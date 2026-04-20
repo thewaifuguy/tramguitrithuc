@@ -1,0 +1,691 @@
+/* === Trạm gửi tri thức — brand styles === */
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap');
+
+:root {
+    --primary: #2C5F5C;
+    --primary-dark: #1F4544;
+    --primary-light: #4A7E7B;
+    --bg: #F5EFDC;
+    --bg-soft: #FAF6E8;
+    --bg-card: #FFFFFF;
+    --accent: #E8A33D;
+    --accent-soft: #FCE8C7;
+    --text: #1F3D3B;
+    --text-muted: #6B7C7B;
+    --border: rgba(44, 95, 92, 0.15);
+    --shadow-sm: 0 1px 3px rgba(31, 61, 59, 0.06);
+    --shadow-md: 0 4px 16px rgba(31, 61, 59, 0.08);
+    --shadow-lg: 0 8px 32px rgba(31, 61, 59, 0.12);
+}
+
+/* === Hide Streamlit chrome === */
+header[data-testid="stHeader"] { display: none; }
+.stDeployButton { display: none; }
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+
+/* === Global typography (avoid touching icon fonts) === */
+.stApp,
+.stMarkdown, .stMarkdown p, .stMarkdown li,
+[data-testid="stText"], [data-testid="stCaptionContainer"],
+[data-testid="stMetricLabel"], [data-testid="stMetricValue"],
+[data-testid="stMetricDelta"],
+input, textarea, select,
+button, button > div,
+[data-baseweb="tab"], [data-baseweb="select"],
+.brand-title, .hero-title, .hero-tagline, .hero-badge,
+.hero-stat-value, .hero-stat-label,
+.status-badge {
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif !important;
+}
+h1, h2, h3, h4 {
+    font-family: 'Lora', Georgia, serif !important;
+    color: var(--text) !important;
+    letter-spacing: -0.015em;
+}
+/* Explicitly preserve Material Icon fonts so Streamlit chrome icons work */
+[class*="material-symbols"],
+[class*="MaterialIcon"],
+.material-icons,
+.material-symbols-outlined,
+.material-symbols-rounded,
+.material-symbols-sharp,
+[data-testid*="icon"] span:first-child,
+.stIconMaterial {
+    font-family: 'Material Symbols Outlined', 'Material Icons' !important;
+}
+.stApp {
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
+}
+
+/* === Hero === */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 32px 36px;
+    background: linear-gradient(135deg, #FFFFFF 0%, #FAF6E8 100%);
+    border-radius: 20px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+}
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0.6;
+    pointer-events: none;
+}
+.hero-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 1;
+}
+.hero-logo {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: var(--shadow-md);
+    background: var(--bg);
+    border: 3px solid var(--bg);
+}
+.hero-fallback {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; color: var(--bg);
+    box-shadow: var(--shadow-md);
+}
+.hero-text { z-index: 1; }
+.hero-title {
+    font-family: 'Lora', serif !important;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary) !important;
+    margin: 0;
+    line-height: 1.1;
+}
+.hero-tagline {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-weight: 500;
+}
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 4px 12px;
+    background: var(--accent-soft);
+    color: #8B5A1A;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.hero-stats {
+    display: flex;
+    gap: 28px;
+    z-index: 1;
+}
+.hero-stat {
+    text-align: center;
+    padding: 0 8px;
+}
+.hero-stat-value {
+    font-family: 'Lora', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+.hero-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+/* === Tabs === */
+[data-baseweb="tab-list"] {
+    background: transparent !important;
+    gap: 4px !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 0 !important;
+}
+button[data-baseweb="tab"] {
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    padding: 12px 20px !important;
+    background: transparent !important;
+    border-radius: 10px 10px 0 0 !important;
+    color: var(--text-muted) !important;
+}
+button[data-baseweb="tab"]:hover {
+    background: rgba(44, 95, 92, 0.05) !important;
+    color: var(--primary) !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: var(--primary) !important;
+    background: white !important;
+    border-bottom: 3px solid var(--accent) !important;
+}
+
+/* === Buttons === */
+button[kind="primary"] {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+    border: none !important;
+    color: var(--bg) !important;
+    font-weight: 600 !important;
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+    padding: 10px 20px !important;
+    border-radius: 10px !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.2s !important;
+}
+button[kind="primary"]:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md) !important;
+}
+button[kind="secondary"] {
+    border: 1.5px solid var(--border) !important;
+    background: white !important;
+    color: var(--primary) !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+}
+
+/* === Containers (cards) === */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: var(--bg-card) !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* === Expander === */
+details {
+    background: var(--bg-card) !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+details > summary {
+    font-weight: 600 !important;
+    color: var(--primary) !important;
+    padding: 14px 18px !important;
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+}
+
+/* === Metrics === */
+[data-testid="stMetric"] {
+    background: var(--bg-card);
+    padding: 16px 20px;
+    border-radius: 12px;
+    border-left: 4px solid var(--accent);
+    box-shadow: var(--shadow-sm);
+}
+[data-testid="stMetricLabel"] {
+    color: var(--text-muted) !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600 !important;
+}
+[data-testid="stMetricValue"] {
+    font-family: 'Lora', serif !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+}
+
+/* === Inputs === */
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea {
+    border: 1.5px solid var(--border) !important;
+    border-radius: 10px !important;
+    background: white !important;
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+}
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(44, 95, 92, 0.1) !important;
+}
+
+/* === Captions === */
+[data-testid="stCaptionContainer"] {
+    color: var(--text-muted) !important;
+    font-style: normal !important;
+    font-size: 13px !important;
+}
+
+/* === Info/Success/Error boxes === */
+[data-testid="stAlertContainer"] {
+    border-radius: 12px !important;
+    border-left-width: 4px !important;
+}
+
+/* === Sidebar === */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+}
+[data-testid="stSidebar"] * {
+    color: var(--bg) !important;
+}
+[data-testid="stSidebar"] h3 {
+    color: var(--accent) !important;
+    font-family: 'Lora', serif !important;
+}
+
+/* === Status badges === */
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.status-pending { background: var(--accent-soft); color: #8B5A1A; }
+.status-approved { background: rgba(44, 95, 92, 0.15); color: var(--primary); }
+.status-rejected { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+
+/* === Hero stat icons === */
+.hero-stat-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+    opacity: 0.85;
+}
+.hero-stat {
+    transition: transform 0.2s;
+    cursor: default;
+}
+.hero-stat:hover { transform: translateY(-2px); }
+
+/* === "How it works" 3-step section === */
+.how-it-works {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 16px;
+    align-items: stretch;
+    margin: 8px 0 32px 0;
+}
+.step-card {
+    background: var(--bg-card);
+    padding: 24px 20px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.step-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+.step-num {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: var(--shadow-sm);
+}
+.step-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+.step-title {
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--primary);
+    margin-bottom: 6px;
+}
+.step-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+.step-arrow {
+    align-self: center;
+    font-size: 28px;
+    color: var(--accent);
+    opacity: 0.6;
+    font-weight: 300;
+}
+
+/* === CTA standalone header === */
+.cta-standalone {
+    background: linear-gradient(135deg, #FFFFFF 0%, var(--bg-soft) 100%);
+    padding: 22px 26px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+}
+.cta-title {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+}
+.cta-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* === Suggestion bar (separate section) === */
+.suggestion-header {
+    margin: 4px 2px 10px 2px;
+}
+.suggestion-label {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+/* Suggestion chip buttons — target buttons inside the suggestion row */
+div[data-testid="stHorizontalBlock"] button[kind="secondary"] {
+    background: white !important;
+    color: var(--primary) !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 999px !important;
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    transition: all 0.15s !important;
+    box-shadow: var(--shadow-sm) !important;
+    white-space: nowrap;
+}
+div[data-testid="stHorizontalBlock"] button[kind="secondary"]:hover {
+    background: var(--accent-soft) !important;
+    color: #8B5A1A !important;
+    border-color: var(--accent) !important;
+    transform: translateY(-1px);
+}
+
+/* === Empty state === */
+.empty-state {
+    background: var(--bg-card);
+    padding: 48px 32px;
+    border-radius: 16px;
+    border: 2px dashed var(--border);
+    text-align: center;
+    margin: 16px 0;
+}
+.empty-illustration {
+    font-size: 56px;
+    margin-bottom: 12px;
+    opacity: 0.7;
+}
+.empty-title {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 6px;
+}
+.empty-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+.empty-cta {
+    margin-top: 16px;
+    display: inline-block;
+    padding: 8px 20px;
+    background: var(--accent-soft);
+    color: #8B5A1A;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* === Sample card === */
+.sample-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, var(--bg-card) 0%, #FAF6E8 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s;
+}
+.sample-card:hover { box-shadow: var(--shadow-md); }
+.sample-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+.sample-text { flex: 1; }
+.sample-title {
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 16px;
+}
+.sample-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.sample-badge {
+    background: var(--accent-soft);
+    color: #8B5A1A;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+/* === Draft card === */
+.draft-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+}
+.draft-title-block { flex: 1; }
+.draft-title {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.25;
+    margin-bottom: 6px;
+}
+.draft-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+.draft-meta code {
+    background: rgba(44, 95, 92, 0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--primary);
+}
+
+/* Section label above content/images columns */
+.section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Draft content typography — compact */
+.draft-content-wrapper + div .stMarkdown h1 {
+    font-family: 'Lora', serif !important;
+    font-size: 20px !important;
+    color: var(--primary) !important;
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent);
+    line-height: 1.2;
+}
+.draft-content-wrapper + div .stMarkdown h2 {
+    font-family: 'Lora', serif !important;
+    font-size: 16px !important;
+    color: var(--primary) !important;
+    margin-top: 16px !important;
+    margin-bottom: 6px !important;
+}
+.draft-content-wrapper + div .stMarkdown h3 {
+    font-size: 14px !important;
+    color: var(--text) !important;
+    margin-top: 12px !important;
+    margin-bottom: 4px !important;
+    font-weight: 700 !important;
+}
+.draft-content-wrapper + div .stMarkdown p,
+.draft-content-wrapper + div .stMarkdown li {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+.draft-content-wrapper + div .stMarkdown blockquote {
+    background: var(--bg-soft);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 10px 0;
+    color: var(--text);
+    font-size: 13px;
+}
+.draft-content-wrapper + div .stMarkdown strong {
+    color: var(--primary);
+}
+.draft-content-wrapper + div .stMarkdown ul,
+.draft-content-wrapper + div .stMarkdown ol {
+    padding-left: 20px;
+    margin: 6px 0;
+}
+.draft-content-wrapper + div .stMarkdown code {
+    font-size: 12px;
+    background: rgba(44, 95, 92, 0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+/* Image gallery inside draft card */
+.stImage img {
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+}
+
+/* Pollinations images (HTML img — fetched by browser directly) */
+.pollinations-img-wrap {
+    margin-bottom: 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    min-height: 120px;
+}
+.pollinations-img-wrap::before {
+    content: '⏳ Đang sinh ảnh...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+    z-index: 0;
+}
+.pollinations-img-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+    position: relative;
+    z-index: 1;
+    background: var(--bg-soft);
+}
+.pollinations-caption {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 6px 0 10px 0;
+    background: white;
+}
+
+/* === Section heading === */
+.section-heading {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 24px 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-heading::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+}
+
+/* Responsive: stack steps on small screens */
+@media (max-width: 900px) {
+    .how-it-works {
+        grid-template-columns: 1fr;
+    }
+    .step-arrow { display: none; }
+}

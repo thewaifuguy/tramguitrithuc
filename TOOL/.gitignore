@@ -1,0 +1,30 @@
+# Secrets
+.env
+firebase-key.json
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Output
+output/
+*.pdf
+
+# Local SQLite DB (data lives in Firestore)
+data/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

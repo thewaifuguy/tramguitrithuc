@@ -1,0 +1,15 @@
+# Streamlit theme — brand "Trạm gửi tri thức"
+
+[theme]
+primaryColor = "#2C5F5C"
+backgroundColor = "#F5EFDC"
+secondaryBackgroundColor = "#EDE5C9"
+textColor = "#1F3D3B"
+font = "serif"
+
+[server]
+headless = true
+runOnSave = true
+
+[browser]
+gatherUsageStats = false
