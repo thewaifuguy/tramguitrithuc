@@ -138,7 +138,7 @@ d:\GCED PROJECT\
 - `db/schemas.py`: thêm `PostDraft` schema (type, content, image_prompt, status)
 - `db/storage.py`: thêm CRUD cho posts
 - `integrations/facebook_mock.py`: render HTML giống Facebook post (avatar Trạm gửi tri thức, header, caption, fake like/comment count) → embed vào Streamlit
-- Dashboard: tab "📱 Posts" — pending → approve → "Published (mock)"
+- Dashboard: tab "📱 Posts" — Gồm 2 phần: Chờ duyệt (Drafts) và Sẵn sàng đăng (Ready to post). User copy nội dung thủ công từ tab Sẵn sàng đăng.
 
 **Verify:** Approve 1 chapter → vào tab Posts → có 3 post draft → approve 1 → preview hiện ra đẹp như FB thật.
 

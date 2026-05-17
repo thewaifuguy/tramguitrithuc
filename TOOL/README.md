@@ -48,6 +48,13 @@ pip install -r requirements.txt
    ```
    ⚠️ Rules này mở hoàn toàn, chỉ dùng cho MVP local. Sau này khi deploy cloud sẽ siết lại.
 
+### 5. Chạy Dashboard
+```powershell
+# Cách 1 (Nhanh nhất): Click đúp file run_dashboard.bat
+# Cách 2 (Dùng lệnh): 
+python -m streamlit run dashboard/app.py
+```
+
 ## Chạy
 
 ### Sinh 1 chapter mới (lưu vào Firestore)
@@ -128,7 +135,7 @@ TOOL/
 - [ ] Download `firebase-key.json` vào TOOL folder
 - [ ] Cài `pip install -r requirements.txt` (có firebase-admin + streamlit)
 - [ ] Chạy `python scripts/run_writer.py --topic "..."` → verify có doc mới trong Firestore Console
-- [ ] Chạy `streamlit run dashboard/app.py` → thấy draft ở tab Pending
+- [ ] Chạy `python -m streamlit run dashboard/app.py` (hoặc click file `run_dashboard.bat`) → thấy draft ở tab Pending
 - [ ] Test reject với 1 lý do → verify draft mới xuất hiện
 - [ ] Test reject 3 lần liên tiếp cùng chapter → verify escalate
 - [ ] Test approve → verify chuyển qua tab Approved

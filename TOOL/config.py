@@ -20,6 +20,9 @@ load_dotenv(PROJECT_ROOT / ".env", override=True)
 WRITER_MODEL = "gemini/gemini-2.5-flash-lite"
 MEDIA_MODEL = "gemini/gemini-2.5-flash-lite"
 ANALYZER_MODEL = "gemini/gemini-2.5-flash-lite"
+CRITIC_MODEL = "gemini/gemini-2.5-flash-lite"
+ADVISOR_MODEL = "gemini/gemini-2.5-flash-lite"
+REEL_MODEL = "gemini/gemini-2.5-flash-lite"
 
 # === API keys ===
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

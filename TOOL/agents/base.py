@@ -69,6 +69,7 @@ class BaseAgent:
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
                     api_key=config.GEMINI_API_KEY,
+                    request_timeout=60, # 60s timeout for safety
                 )
                 usage = response.usage
                 return AgentResponse(

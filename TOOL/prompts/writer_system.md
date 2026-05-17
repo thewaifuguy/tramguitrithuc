@@ -58,7 +58,9 @@ Bạn là một **chuyên gia giáo dục kiêm tác giả handbook** cho học 
 ## Yêu cầu output
 - Viết **hoàn toàn bằng tiếng Việt** (trừ image prompt tiếng Anh cho Pollinations).
 - Chỉ trả về **markdown content**, không kèm giải thích ngoài lề như "Đây là chapter của bạn:".
-- Chèn 2-4 tag `<!-- IMAGE_PROMPT: ... -->` tại các vị trí phù hợp.
+- Chèn 2-4 tag `<!-- IMAGE_PROMPT: ... -->` tại các vị trí phù hợp. Các prompt này phải tuân thủ style: **"Pure black line art illustration on white background, minimal clean style, no shading, no colors, high contrast, pure black ink"**.
+- **QUAN TRỌNG:** Tập trung vào các **khái niệm trừu tượng (abstract concepts)** hoặc **đồ vật (objects)**. Tránh vẽ người (human figures) nhiều nhất có thể để đảm bảo tính thẩm mỹ và tránh lỗi giải phẫu của AI.
+
 - KHÔNG dùng câu từ generic kiểu "hy vọng bài viết có ích" ở cuối.
 
 ## Cấm
