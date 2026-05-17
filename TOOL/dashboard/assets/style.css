@@ -11,8 +11,8 @@
     --bg-card: #FFFFFF;
     --accent: #E8A33D;
     --accent-soft: #FCE8C7;
-    --text: #1F3D3B;
-    --text-muted: #6B7C7B;
+    --text: #111111;
+    --text-muted: #4A5554;
     --border: rgba(44, 95, 92, 0.15);
     --shadow-sm: 0 1px 3px rgba(31, 61, 59, 0.06);
     --shadow-md: 0 4px 16px rgba(31, 61, 59, 0.08);
@@ -689,3 +689,60 @@ div[data-testid="stHorizontalBlock"] button[kind="secondary"]:hover {
     }
     .step-arrow { display: none; }
 }
+
+/* === CRITICAL READABILITY FIX: Force all main content text to black/dark gray === */
+[data-testid="stMain"] .stMarkdown p,
+[data-testid="stMain"] .stMarkdown li,
+[data-testid="stMain"] .stMarkdown span,
+[data-testid="stMain"] .stMarkdown strong,
+[data-testid="stMain"] .stMarkdown blockquote,
+[data-testid="stMain"] [data-testid="stText"],
+[data-testid="stMain"] [data-testid="stWidgetLabel"] p,
+[data-testid="stMain"] [data-testid="stWidgetLabel"] span,
+[data-testid="stMain"] label,
+[data-testid="stMain"] input,
+[data-testid="stMain"] textarea,
+[data-testid="stMain"] .hero-tagline,
+[data-testid="stMain"] .step-desc,
+[data-testid="stMain"] .cta-subtitle,
+[data-testid="stMain"] .sample-desc,
+[data-testid="stMain"] .empty-desc,
+[data-testid="stMain"] .draft-meta,
+[data-testid="stMain"] .draft-meta code,
+[data-testid="stMain"] [data-testid="stMetricLabel"] p,
+[data-testid="stMain"] [data-testid="stMetricLabel"] span {
+    color: #111111 !important;
+}
+
+[data-testid="stMain"] h1,
+[data-testid="stMain"] h2,
+[data-testid="stMain"] h3,
+[data-testid="stMain"] h4,
+[data-testid="stMain"] h5,
+[data-testid="stMain"] h6,
+[data-testid="stMain"] .hero-title,
+[data-testid="stMain"] .hero-stat-value,
+[data-testid="stMain"] .step-title,
+[data-testid="stMain"] .cta-title,
+[data-testid="stMain"] .sample-title,
+[data-testid="stMain"] .empty-title,
+[data-testid="stMain"] .draft-title,
+[data-testid="stMain"] .section-heading {
+    color: #111111 !important;
+}
+
+/* Specific component fixes for light/dark theme consistency */
+[data-testid="stMain"] button[data-baseweb="tab"] {
+    color: #4A5554 !important;
+}
+[data-testid="stMain"] button[data-baseweb="tab"][aria-selected="true"] {
+    color: var(--primary) !important;
+}
+[data-testid="stMain"] button[data-baseweb="tab"]:hover {
+    color: var(--primary) !important;
+}
+
+/* Status badges override to keep text readable */
+.status-pending { background-color: var(--accent-soft) !important; color: #8B5A1A !important; }
+.status-approved { background-color: rgba(44, 95, 92, 0.15) !important; color: var(--primary) !important; }
+.status-rejected { background-color: rgba(220, 53, 69, 0.1) !important; color: #dc3545 !important; }
