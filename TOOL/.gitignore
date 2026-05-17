@@ -1,5 +1,4 @@
 # Secrets
-.env
 firebase-key.json
 *.pem
 
