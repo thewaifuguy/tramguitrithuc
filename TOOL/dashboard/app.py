@@ -248,7 +248,7 @@ with tab_intro:
         st.markdown("### 📈 Mục tiêu 2026")
         st.markdown(
             """
-            <div style="background:rgba(44, 95, 92, 0.05);padding:20px;border-radius:15px;border-left:5px solid #E8A33D;">
+            <div style="background:rgba(44, 95, 92, 0.05);padding:20px;border-radius:15px;border-left:5px solid #E8A33D;color:#111111;">
                 <div style="font-size:16px;margin-bottom:10px;">
                     🎓 <b>1000+</b> học sinh khó khăn được hỗ trợ handbook miễn phí.
                 </div>
