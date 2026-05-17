@@ -297,11 +297,27 @@ with tab_demo:
     
     demo_topic = st.text_input("Nhập chủ đề muốn trình diễn", value="Kỹ thuật ghi nhớ Active Recall cho học sinh")
     
-    if st.button("🏁 Bắt đầu Quy trình Demo", type="primary", use_container_width=True):
-        if not demo_topic:
-            st.error("Vui lòng nhập chủ đề.")
+    col_pipeline, col_quick = st.columns(2)
+    with col_pipeline:
+        if st.button("🏁 Bắt đầu Quy trình Demo", type="primary", use_container_width=True):
+            if not demo_topic:
+                st.error("Vui lòng nhập chủ đề.")
+            else:
+                run_demo_pipeline(demo_topic)
+    with col_quick:
+        backup_pdf_path = config.PROJECT_ROOT / "TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf"
+        if backup_pdf_path.exists():
+            with open(backup_pdf_path, "rb") as f:
+                st.download_button(
+                    label="⚡ Generate Quick Handbook",
+                    data=f,
+                    file_name="TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                    help="Tải nhanh bản thiết kế Handbook mẫu chất lượng cao đã sinh sẵn (Dự phòng)"
+                )
         else:
-            run_demo_pipeline(demo_topic)
+            st.button("⚡ Generate Quick Handbook (Không tìm thấy PDF mẫu)", disabled=True, use_container_width=True)
 
 def run_demo_pipeline(topic: str):
     """Runs a full end-to-end demo flow with visual steps."""
@@ -365,8 +381,22 @@ def run_demo_pipeline(topic: str):
     
     # Step 4: PDF Export
     status_area.info("📄 **Bước 4/4:** Đang đóng gói nội dung và xuất bản Handbook PDF...")
-    from export.pdf_builder import build_chapter_pdf
-    pdf_path = build_chapter_pdf(draft_id, topic, draft_obj.content_md)
+    backup_pdf_path = config.PROJECT_ROOT / "TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf"
+    
+    try:
+        from export.pdf_builder import build_chapter_pdf
+        pdf_path = build_chapter_pdf(draft_id, topic, draft_obj.content_md)
+        st.success("✅ Đã xuất bản Handbook PDF từ nội dung mới.")
+    except Exception as e:
+        st.warning(f"⚠️ Lỗi hệ thống khi sinh PDF mới: {e}. Đang tự động kích hoạt Dự phòng (Escape Route)...")
+        if backup_pdf_path.exists():
+            pdf_path = str(backup_pdf_path)
+            topic = "Trạm gửi tri thức - Đánh thức tư duy"
+            st.success("✅ Đã kích hoạt bản thiết kế dự phòng mẫu thành công!")
+        else:
+            st.error("🚨 Không tìm thấy tệp dự phòng mẫu!")
+            raise e
+            
     progress_bar.progress(100)
     
     status_area.success("🎊 **QUY TRÌNH HOÀN TẤT!**")
@@ -376,7 +406,14 @@ def run_demo_pipeline(topic: str):
     with col_res1:
         st.markdown("#### 📖 Handbook PDF")
         with open(pdf_path, "rb") as f:
-            st.download_button("⬇️ Tải xuống Handbook", f, file_name=f"{topic}.pdf")
+            pdf_data = f.read()
+        st.download_button(
+            label="⬇️ Tải xuống Handbook", 
+            data=pdf_data, 
+            file_name=f"{topic}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
     with col_res2:
         st.markdown("#### 📱 Facebook Posts")
         st.info("Các bài viết đã sẵn sàng trong tab 'Quảng bá (Social)'.")
