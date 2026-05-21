@@ -5,88 +5,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
+from gemini_secrets import inject_gemini_key_to_env, resolve_gemini_api_key
+
 PROJECT_ROOT = Path(__file__).parent
-# override=False: Streamlit Secrets / env vars win; .env only fills missing (local dev)
 load_dotenv(PROJECT_ROOT / ".env", override=False)
 
 # === LLM models (LiteLLM format: provider/model-name) ===
-# NOTE: Gemini 2.5 Pro no longer has free tier (Google removed it).
-# Gemini free tier: 1500 requests/day per model. If hit daily quota,
-# switch WRITER_MODEL to a different model (each has separate quota pool):
-#   - "gemini/gemini-2.5-flash"     (highest quality Flash)
-#   - "gemini/gemini-2.5-flash-lite"     (stable, reliable, separate quota)
-#   - "gemini/gemini-1.5-flash"     (older, smaller usage, separate quota)
-#   - "gemini/gemini-2.5-flash-lite"  (smallest, separate quota)
 WRITER_MODEL = "gemini/gemini-2.5-flash-lite"
 MEDIA_MODEL = "gemini/gemini-2.5-flash-lite"
 ANALYZER_MODEL = "gemini/gemini-2.5-flash-lite"
 CRITIC_MODEL = "gemini/gemini-2.5-flash-lite"
 ADVISOR_MODEL = "gemini/gemini-2.5-flash-lite"
 REEL_MODEL = "gemini/gemini-2.5-flash-lite"
-
-# === API keys ===
-def _clean_key(value: str | None) -> str | None:
-    if not value:
-        return None
-    cleaned = str(value).strip().strip('"').strip("'")
-    return cleaned or None
-
-
-def sync_streamlit_secrets_to_env() -> None:
-    """Copy Streamlit Cloud / local secrets into os.environ (call once at app startup)."""
-    try:
-        import streamlit as st
-
-        for name in ("GEMINI_API_KEY",):
-            try:
-                if name in st.secrets:
-                    val = _clean_key(st.secrets[name])
-                    if val:
-                        os.environ[name] = val
-            except Exception:
-                continue
-    except Exception:
-        pass
-
-
-def _resolve_gemini_api_key() -> str | None:
-    """Streamlit Secrets → environment → .env (via load_dotenv)."""
-    sync_streamlit_secrets_to_env()
-
-    key: str | None = None
-
-    try:
-        import streamlit as st
-
-        if hasattr(st, "secrets"):
-            try:
-                key = _clean_key(st.secrets["GEMINI_API_KEY"])
-            except (KeyError, TypeError):
-                pass
-    except Exception:
-        pass
-
-    if not key:
-        key = _clean_key(os.getenv("GEMINI_API_KEY"))
-
-    return key
-
-
-def gemini_api_key() -> str | None:
-    return _resolve_gemini_api_key()
-
-
-def gemini_key_status() -> dict[str, str | bool]:
-    """Safe diagnostic for UI (never exposes full key)."""
-    key = _resolve_gemini_api_key()
-    if not key:
-        return {"ok": False, "hint": "Chưa có GEMINI_API_KEY", "preview": ""}
-    return {
-        "ok": True,
-        "hint": "Đã nạp key",
-        "preview": f"{key[:6]}...{key[-4:]}" if len(key) > 12 else "(key ngắn)",
-    }
-
 
 # === Paths ===
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
@@ -99,8 +29,8 @@ SQLITE_PATH = DATA_DIR / "gced.db"
 ASSETS_DIR = PROJECT_ROOT / "dashboard" / "assets"
 LOGO_PATH = ASSETS_DIR / "logo.png"
 
+
 def sample_handbook_path() -> Path | None:
-    """Delegate to dashboard.sample_pdf (keeps old import paths working)."""
     from dashboard.sample_pdf import sample_handbook_path as _find
 
     return _find()
@@ -111,7 +41,7 @@ WRITER_TEMPERATURE = 0.7
 WRITER_MAX_TOKENS = 8000
 
 # === Workflow rules ===
-MAX_RETRY = 1  # demo: 1 retry max (production was 3)
+MAX_RETRY = 1
 
 # === Brand ===
 BRAND_NAME = "Trạm gửi tri thức"
@@ -120,12 +50,32 @@ COLOR_BACKGROUND = "#F5EFDC"
 COLOR_ACCENT = "#E8A33D"
 
 
+def gemini_api_key() -> str | None:
+    return resolve_gemini_api_key()
+
+
+def gemini_key_status() -> dict[str, str | bool]:
+    from gemini_secrets import key_status
+
+    return key_status()
+
+
+def sync_streamlit_secrets_to_env() -> None:
+    inject_gemini_key_to_env()
+
+
 def require_gemini_key() -> str:
-    key = _resolve_gemini_api_key()
+    key = inject_gemini_key_to_env()
     if not key:
+        status = gemini_key_status()
+        keys_hint = status.get("secret_keys", "")
+        extra = f" Keys trong Secrets: [{keys_hint}]." if keys_hint else ""
         raise RuntimeError(
-            "GEMINI_API_KEY not set. "
-            "Streamlit Cloud: App settings → Secrets → GEMINI_API_KEY = \"your-key\". "
-            "Local: copy .env.example to .env. Get a key at https://aistudio.google.com/"
+            "GEMINI_API_KEY chưa được nạp. "
+            "Streamlit Cloud → Settings → Secrets, dán đúng:\n"
+            'GEMINI_API_KEY = "your-key-here"\n'
+            "Sau đó Save → Reboot app. "
+            "Hoặc nhập key tạm ở sidebar (mục Cấu hình API)."
+            + extra
         )
     return key

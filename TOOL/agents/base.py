@@ -53,7 +53,7 @@ class BaseAgent:
         self.system_prompt = Path(system_prompt_path).read_text(encoding="utf-8")
 
     def complete(self, user_prompt: str, retries: int = 4) -> AgentResponse:
-        config.require_gemini_key()
+        api_key = config.require_gemini_key()
 
         messages = [
             {"role": "system", "content": self.system_prompt},
@@ -68,7 +68,7 @@ class BaseAgent:
                     messages=messages,
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
-                    api_key=config.GEMINI_API_KEY,
+                    api_key=api_key,
                     request_timeout=60, # 60s timeout for safety
                 )
                 usage = response.usage

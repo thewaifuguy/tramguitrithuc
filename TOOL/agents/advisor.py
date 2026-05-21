@@ -19,8 +19,8 @@ class SocialAdvisorAgent(BaseAgent):
     def get_advice(self, user_query: str, history: list[dict[str, str]] = None) -> str:
         """Generates strategic advice for social media growth."""
         
-        config.require_gemini_key()
-        
+        api_key = config.require_gemini_key()
+
         # Load real-time context if available
         context_path = config.DATA_DIR / "facebook_context.json"
         fb_context = ""
@@ -44,7 +44,7 @@ class SocialAdvisorAgent(BaseAgent):
                 messages=messages,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
-                api_key=config.GEMINI_API_KEY,
+                api_key=api_key,
             )
             return response.choices[0].message.content
         except Exception as e:

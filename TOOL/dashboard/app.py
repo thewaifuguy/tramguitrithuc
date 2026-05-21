@@ -20,23 +20,31 @@ import streamlit as st
 _TOOL_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(_TOOL_ROOT))
 
-
-def _bootstrap_env() -> None:
-    """Streamlit Secrets → os.environ before config/agents load."""
-    import os
-
-    try:
-        if "GEMINI_API_KEY" in st.secrets:
-            raw = str(st.secrets["GEMINI_API_KEY"]).strip().strip('"').strip("'")
-            if raw:
-                os.environ["GEMINI_API_KEY"] = raw
-    except Exception:
-        pass
-
-
-_bootstrap_env()
+st.set_page_config(
+    page_title="Trạm gửi tri thức",
+    page_icon="📚",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 import requests
+
+from gemini_secrets import inject_gemini_key_to_env
+
+inject_gemini_key_to_env()
+
+
+def _ensure_api_key() -> None:
+    """Secrets + optional manual key from sidebar."""
+    import os
+
+    inject_gemini_key_to_env()
+    manual = st.session_state.get("manual_gemini_key")
+    if manual:
+        os.environ["GEMINI_API_KEY"] = manual
+
+
+_ensure_api_key()
 
 import config
 from agents.media import MediaAgent
@@ -100,13 +108,6 @@ from dashboard.sample_pdf import (
     get_sample_handbook_bytes,
     sample_handbook_download_name,
     sample_handbook_path,
-)
-
-st.set_page_config(
-    page_title=config.BRAND_NAME,
-    page_icon="📚",
-    layout="wide",
-    initial_sidebar_state="expanded",
 )
 
 # Initialize session state for page routing
@@ -432,9 +433,12 @@ render_sample_card()
 
 def _trigger_generate(topic: str, outline: str | None) -> bool:
     """Returns True nếu tạo thành công, False nếu fail."""
+    import os
     import time
     from db.schemas import ChapterStatus
-    
+
+    _ensure_api_key()
+
     try:
         with st.spinner(f"AI Writer đang viết chapter về '{topic}'..."):
             agent = WriterAgent()
@@ -679,7 +683,8 @@ def run_demo_pipeline(topic: str):
     # Step 1: Generation
     status_area.info(f"🚀 **Bước 1/4:** AI Writer đang biên soạn chapter: *{topic}*...")
     progress_bar.progress(10)
-    
+    _ensure_api_key()
+
     try:
         from agents.writer import WriterAgent
         writer = WriterAgent()
@@ -1126,6 +1131,7 @@ def _handle_reject(
         st.rerun()
         return
 
+    _ensure_api_key()
     try:
         with st.spinner(f"AI viết lại (lần {draft.retry_count + 2}/{config.MAX_RETRY + 1})..."):
             agent = WriterAgent()

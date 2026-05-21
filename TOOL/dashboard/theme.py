@@ -123,14 +123,39 @@ def render_sidebar() -> None:
             """
         )
 
+        from gemini_secrets import inject_gemini_key_to_env
+
+        inject_gemini_key_to_env()
         key_status = config.gemini_key_status()
         if key_status["ok"]:
             st.success(f"🔑 Gemini API: {key_status['hint']} `{key_status['preview']}`")
         else:
-            st.error(
-                "🔑 Gemini API: chưa cấu hình. "
-                "Streamlit → Settings → Secrets → `GEMINI_API_KEY = \"...\"` → Reboot app."
+            st.error("🔑 Gemini API: chưa đọc được từ Secrets.")
+            if key_status.get("secret_keys"):
+                st.caption(f"Keys trong Secrets: `{key_status['secret_keys']}`")
+
+        with st.expander("🔧 Cấu hình API (nếu Secrets không chạy)", expanded=not key_status["ok"]):
+            st.caption(
+                "Dán key Gemini tạm cho phiên này (không lưu GitHub). "
+                "Format Secrets đúng: `GEMINI_API_KEY = \"...\"`"
             )
+            manual = st.text_input(
+                "GEMINI_API_KEY (tạm)",
+                type="password",
+                key="sidebar_manual_gemini_key",
+                placeholder="AIzaSy...",
+            )
+            if st.button("Áp dụng key", key="apply_manual_gemini_key", use_container_width=True):
+                import os
+
+                cleaned = manual.strip().strip('"').strip("'")
+                if cleaned:
+                    st.session_state["manual_gemini_key"] = cleaned
+                    os.environ["GEMINI_API_KEY"] = cleaned
+                    st.success("Đã áp dụng key cho phiên này. Thử sinh chapter lại.")
+                    st.rerun()
+                else:
+                    st.warning("Nhập key trước khi bấm Áp dụng.")
 
         if sample_handbook_path():
             st.caption("📖 Handbook mẫu PDF: có sẵn trên server")
