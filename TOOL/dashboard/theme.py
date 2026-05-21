@@ -205,20 +205,37 @@ def render_empty_state(title: str, description: str, cta: str = "") -> None:
 
 
 def render_sample_card() -> None:
-    """Promotional card showing what a finished handbook looks like."""
+    """Promotional card + download for the official sample handbook PDF."""
+    sample_path = config.sample_handbook_path()
     st.markdown(
-        """
+        f"""
         <div class="sample-card">
             <div class="sample-icon">📖</div>
             <div class="sample-text">
-                <div class="sample-title">Xem trước handbook mẫu</div>
-                <div class="sample-desc">Sản phẩm cuối là PDF in được, có ảnh minh họa, layout sách chuyên nghiệp.</div>
+                <div class="sample-title">Handbook mẫu: {config.SAMPLE_HANDBOOK_TITLE}</div>
+                <div class="sample-desc">PDF in được, có ảnh minh họa, layout sách chuyên nghiệp — dùng cho demo và thuyết trình.</div>
             </div>
-            <div class="sample-badge">Sắp ra mắt</div>
+            <div class="sample-badge">Mẫu chính thức</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+    if sample_path:
+        with open(sample_path, "rb") as f:
+            st.download_button(
+                label="⬇️ Tải handbook mẫu (PDF)",
+                data=f.read(),
+                file_name=config.SAMPLE_HANDBOOK_FILENAME,
+                mime="application/pdf",
+                use_container_width=True,
+                key="download-sample-handbook",
+                help=f"Bản thiết kế đã hoàn thiện: {config.SAMPLE_HANDBOOK_TITLE}",
+            )
+    else:
+        st.caption(
+            f"⚠️ Chưa có file `{config.SAMPLE_HANDBOOK_FILENAME}` trong thư mục TOOL. "
+            "Copy PDF handbook mẫu vào đó để hiển thị nút tải."
+        )
 
 
 def _get_stats() -> dict[str, int]:

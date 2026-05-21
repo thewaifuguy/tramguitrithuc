@@ -17,6 +17,7 @@ env/
 # Output
 output/
 *.pdf
+!TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf
 
 # Local SQLite DB (data lives in Firestore)
 data/

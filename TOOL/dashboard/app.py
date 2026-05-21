@@ -87,10 +87,322 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Initialize session state for page routing
+if "current_page" not in st.session_state:
+    st.session_state["current_page"] = "landing"
+
+# PAGE ROUTING
+if st.session_state["current_page"] == "landing":
+    import textwrap
+    
+    st.markdown(
+        textwrap.dedent(
+            """
+            <style>
+            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap');
+
+            :root {
+                --bg-dark: #050508;
+                --text-white: #ffffff;
+                --text-muted: #8e8e9f;
+                --primary-grad: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            }
+
+            .stApp {
+                background-color: var(--bg-dark) !important;
+                font-family: 'Montserrat', sans-serif !important;
+            }
+
+            /* Hide Streamlit components */
+            header[data-testid="stHeader"], footer {
+                background: transparent !important;
+                display: none !important;
+            }
+            
+            .main-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 95vh;
+                padding: 40px 20px;
+            }
+
+            .landing-logo {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 50px;
+            }
+
+            @media (max-width: 991px) {
+                .landing-logo {
+                    justify-content: center;
+                    margin-bottom: 30px;
+                }
+            }
+
+            .logo-icon {
+                font-size: 28px;
+                background: var(--primary-grad);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-weight: 800;
+            }
+
+            .logo-text {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 900;
+                font-size: 20px;
+                color: var(--text-white);
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            .welcome-txt {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 88px;
+                font-weight: 900;
+                line-height: 1.0;
+                color: var(--text-white);
+                margin: 0;
+                letter-spacing: -3px;
+            }
+
+            .project-title {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 48px;
+                font-weight: 800;
+                line-height: 1.1;
+                background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin: 10px 0 25px 0;
+                letter-spacing: -1px;
+            }
+
+            .slogan {
+                font-size: 13px;
+                font-weight: 800;
+                color: #a7f3d0;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                margin-bottom: 15px;
+            }
+
+            .hero-desc {
+                font-size: 15px;
+                line-height: 1.8;
+                color: var(--text-muted);
+                max-width: 540px;
+                margin-bottom: 40px;
+            }
+
+            /* Streamlit Button overrides for landing page only */
+            div.stButton > button {
+                border-radius: 9999px !important;
+                font-family: 'Montserrat', sans-serif !important;
+                font-weight: 700 !important;
+                font-size: 15px !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                height: 52px !important;
+                border: none !important;
+                background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+                color: #ffffff !important;
+                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4) !important;
+            }
+
+            div.stButton > button:hover {
+                transform: translateY(-3px) scale(1.02) !important;
+                box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6) !important;
+            }
+
+            .graphic-side {
+                position: relative;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 480px;
+            }
+
+            .floating-card {
+                position: absolute;
+                right: 20px;
+                bottom: 20px;
+                background: rgba(13, 13, 20, 0.7);
+                backdrop-filter: blur(16px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 20px;
+                padding: 24px;
+                max-width: 280px;
+                text-align: left;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                z-index: 5;
+            }
+
+            .card-logo {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .card-logo-icon {
+                font-size: 20px;
+                color: #c084fc;
+            }
+
+            .card-logo-txt {
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 800;
+                font-size: 13px;
+                color: var(--text-white);
+                letter-spacing: 0.5px;
+            }
+
+            .card-title {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 20px;
+                font-weight: 700;
+                color: var(--text-white);
+                margin: 0 0 10px 0;
+            }
+
+            .card-desc {
+                font-size: 12px;
+                color: var(--text-muted);
+                line-height: 1.6;
+                margin: 0;
+            }
+
+            /* Flame flickering animation */
+            @keyframes flicker {
+                0%, 100% {
+                    transform: scale(1) translate(0, 0);
+                    opacity: 0.95;
+                }
+                20% {
+                    transform: scale(0.95, 1.05) translate(-1px, 1px);
+                    opacity: 0.85;
+                }
+                40% {
+                    transform: scale(1.05, 0.95) translate(1px, -1px);
+                    opacity: 0.90;
+                }
+                60% {
+                    transform: scale(0.97, 1.03) translate(-1px, -1px);
+                    opacity: 0.88;
+                }
+                80% {
+                    transform: scale(1.03, 0.97) translate(1px, 1px);
+                    opacity: 0.93;
+                }
+            }
+
+            .flame-core {
+                transform-origin: 300px 285px;
+                animation: flicker 0.15s infinite alternate ease-in-out;
+            }
+
+            /* Concentric light waves animation */
+            @keyframes lightWave {
+                0% {
+                    transform: scale(0.4);
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: scale(1.3);
+                    opacity: 0;
+                }
+            }
+
+            .glow-wave {
+                transform-origin: 300px 265px;
+                animation: lightWave 4s infinite linear;
+            }
+
+            .glow-wave-1 { animation-delay: 0s; }
+            .glow-wave-2 { animation-delay: 1.33s; }
+            .glow-wave-3 { animation-delay: 2.66s; }
+
+            /* Magic floating sparkles animation */
+            @keyframes floatSparkle {
+                0% {
+                    transform: translateY(0) scale(0);
+                    opacity: 0;
+                }
+                50% {
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: translateY(-120px) scale(1.2);
+                    opacity: 0;
+                }
+            }
+
+            .sparkle {
+                animation: floatSparkle 6s infinite ease-out;
+            }
+
+            .sparkle-1 { animation-delay: 0.5s; transform-origin: 280px 250px; }
+            .sparkle-2 { animation-delay: 2.5s; transform-origin: 320px 220px; }
+            .sparkle-3 { animation-delay: 4.5s; transform-origin: 290px 280px; }
+            </style>
+            """
+        ),
+        unsafe_allow_html=True
+    )
+
+    # 2-column layout in Streamlit
+    col_left, col_right = st.columns([1.2, 1])
+    
+    with col_left:
+        st.markdown(
+            textwrap.dedent(
+                """
+                <div class="landing-logo">
+                    <span class="logo-icon">📖</span>
+                    <span class="logo-text">Trạm gửi tri thức</span>
+                </div>
+                
+                <h1 class="welcome-txt">Welcome.</h1>
+                <h2 class="project-title">Trạm gửi tri thức.</h2>
+                <div class="slogan">Đánh thức tư duy · Kết nối bản làng</div>
+                
+                <p class="hero-desc">
+                    Nền tảng tự động hóa biên soạn học liệu bằng Trí tuệ nhân tạo (AI) 
+                    của tập thể học sinh lớp 8A5. Chúng mình giúp rút ngắn khoảng cách 
+                    giáo dục cho trẻ em vùng cao biên giới Chiềng Chăn bằng công nghệ thông minh.
+                </p>
+                """
+            ),
+            unsafe_allow_html=True
+        )
+        
+        # Native Streamlit buttons styled perfectly
+        st.write("") # Add a little spacing
+        if st.button("🚀 Bắt đầu Sử dụng App", key="landing_btn_app", use_container_width=True):
+            st.session_state["current_page"] = "app"
+            st.rerun()
+                
+    with col_right:
+        st.markdown(
+            """<div class="graphic-side"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="100%" height="100%" fill="none" style="filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.1));"><defs><linearGradient id="warmGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"/><stop offset="50%" stop-color="#ef4444" stop-opacity="0.8"/><stop offset="100%" stop-color="#ec4899" stop-opacity="0.8"/></linearGradient><linearGradient id="flameGrad" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="#ef4444" stop-opacity="1"/><stop offset="40%" stop-color="#f59e0b" stop-opacity="1"/><stop offset="85%" stop-color="#fef08a" stop-opacity="1"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0.9"/></linearGradient><radialGradient id="lanternGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.25"/><stop offset="50%" stop-color="#ef4444" stop-opacity="0.08"/><stop offset="100%" stop-color="#050508" stop-opacity="0"/></radialGradient><filter id="flameBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs><circle cx="300" cy="265" r="220" fill="url(#lanternGlow)"/><circle cx="300" cy="265" r="70" class="glow-wave glow-wave-1"/><circle cx="300" cy="265" r="130" class="glow-wave glow-wave-2"/><circle cx="300" cy="265" r="190" class="glow-wave glow-wave-3"/><path d="M 120,200 C 180,180 240,220 300,210 C 360,200 420,160 480,180" stroke="rgba(245, 158, 11, 0.12)" stroke-width="1.5" /><path d="M 100,260 C 170,230 230,280 300,270 C 370,260 430,210 500,240" stroke="rgba(245, 158, 11, 0.16)" stroke-width="1.5" stroke-dasharray="3,3" /><path d="M 80,320 C 160,290 220,340 300,330 C 380,320 440,270 520,300" stroke="rgba(245, 158, 11, 0.08)" stroke-width="1.5" /><path d="M 280,210 L 282,215 L 287,217 L 282,219 L 280,224 L 278,219 L 273,217 L 278,215 Z" class="sparkle sparkle-1"/><path d="M 325,180 L 327,183 L 332,185 L 327,187 L 325,192 L 323,187 L 318,185 L 323,183 Z" class="sparkle sparkle-2"/><path d="M 295,150 L 297,153 L 302,155 L 297,157 L 295,162 L 293,157 L 288,155 L 293,153 Z" class="sparkle sparkle-3"/><path d="M 230,220 C 230,80 370,80 370,220" stroke="#4b5563" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M 255,210 L 345,210 L 330,175 L 270,175 Z" fill="#2d3748" stroke="#1a202c" stroke-width="2"/><rect x="275" y="160" width="50" height="15" rx="3" fill="#1a202c"/><rect x="285" y="145" width="30" height="15" rx="2" fill="#4a5568"/><circle cx="300" cy="152" r="3" fill="#d97706"/><path d="M 255,210 C 240,250 240,320 255,360 L 345,360 C 360,320 360,250 345,210 Z" fill="rgba(255, 255, 255, 0.04)" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1.5"/><path d="M 270,210 C 258,260 258,310 270,360" fill="none" stroke="#4b5563" stroke-width="2"/><path d="M 330,210 C 342,260 342,310 330,360" fill="none" stroke="#4b5563" stroke-width="2"/><path class="flame-core" d="M 300,240 C 285,275 282,305 300,305 C 318,305 315,275 300,240 Z" fill="url(#flameGrad)" filter="url(#flameBlur)"/><path d="M 240,360 C 240,360 220,370 220,395 L 380,395 C 380,370 360,360 360,360 Z" fill="#2d3748" stroke="#1a202c" stroke-width="2"/><rect x="205" y="395" width="190" height="25" rx="5" fill="#1a202c"/><circle cx="370" cy="382" r="7" fill="#d97706"/><rect x="368" y="370" width="4" height="12" fill="#b45309"/></svg><div class="floating-card"><div class="card-logo"><span class="card-logo-icon">💠</span><span class="card-logo-txt">Sứ mệnh GCED</span></div><h3 class="card-title">Hành trình 8A5.</h3><p class="card-desc">Không chỉ là công nghệ AI, đây là khát vọng mang cơ hội giáo dục bình đẳng đến học sinh vùng cao khó khăn.</p></div></div>""",
+            unsafe_allow_html=True
+        )
+    st.stop()
+
+
+
+# If APP mode, show a small action bar at the very top to go back to Home
+col_back_home, _ = st.columns([2, 5])
+with col_back_home:
+    if st.button("↩️ Quay lại Trang chủ", use_container_width=True, key="back-home-top-btn"):
+        st.session_state["current_page"] = "landing"
+        st.rerun()
+
 apply_theme()
 render_hero()
-# render_sidebar()  # Removed to fix double menu issue, moved to Info tab
-# render_how_it_works() # Moved to Info tab
 render_sample_card()
 
 
@@ -230,8 +542,8 @@ with st.form("new-chapter", clear_on_submit=False):
 
 # === Tabs ===
 
-tab_intro, tab_pending, tab_approved, tab_projects, tab_promotion, tab_rejected, tab_demo = st.tabs(
-    ["ℹ️ Giới thiệu", "⏳ Chờ duyệt bài", "✅ Sách đã duyệt", "📚 Dự án (Projects)", "📢 Quảng bá (Social)", "❌ Lịch sử từ chối", "🎬 Demo Mode"]
+tab_intro, tab_landing, tab_pending, tab_approved, tab_projects, tab_promotion, tab_rejected, tab_demo = st.tabs(
+    ["ℹ️ Giới thiệu", "🌐 Landing Page 3D", "⏳ Chờ duyệt bài", "✅ Sách đã duyệt", "📚 Dự án (Projects)", "📢 Quảng bá (Social)", "❌ Lịch sử từ chối", "🎬 Demo Mode"]
 )
 
 with tab_intro:
@@ -273,12 +585,26 @@ with tab_intro:
     st.markdown("---")
     render_how_it_works()
 
+with tab_landing:
+    st.markdown("### 🌐 Trải nghiệm Trạm Gửi Tri Thức 3D")
+    st.caption("Trải nghiệm không gian 3D tương tác kể câu chuyện dự án (Cuộn dọc trong khung dưới để xem mô hình 3D biến đổi).")
+    
+    # Read and render the HTML component
+    landing_path = Path(__file__).parent / "assets" / "landing.html"
+    if landing_path.exists():
+        with open(landing_path, "r", encoding="utf-8") as f:
+            html_content = f.read()
+        import streamlit.components.v1 as components
+        components.html(html_content, height=800, scrolling=False)
+    else:
+        st.error("Không tìm thấy tệp landing.html trong dashboard/assets!")
+
 with tab_demo:
     st.markdown(
         """
         <div class="demo-header">
             <h3>🎬 Chế độ Demo nhanh</h3>
-            <p>Dành cho hội đồng ban giám khảo. Chạy quy trình mẫu để xem kết quả nhanh nhất.</p>
+            <p>Dành cho hội đồng ban giám khảo. Handbook mẫu: <b>Trạm gửi tri thức — Đánh thức tư duy</b> (PDF có sẵn).</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -305,19 +631,24 @@ with tab_demo:
             else:
                 run_demo_pipeline(demo_topic)
     with col_quick:
-        backup_pdf_path = config.PROJECT_ROOT / "TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf"
-        if backup_pdf_path.exists():
-            with open(backup_pdf_path, "rb") as f:
+        sample_pdf = config.sample_handbook_path()
+        if sample_pdf:
+            with open(sample_pdf, "rb") as f:
                 st.download_button(
-                    label="⚡ Generate Quick Handbook",
-                    data=f,
-                    file_name="TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf",
+                    label="⚡ Handbook mẫu: Đánh thức tư duy",
+                    data=f.read(),
+                    file_name=config.SAMPLE_HANDBOOK_FILENAME,
                     mime="application/pdf",
                     use_container_width=True,
-                    help="Tải nhanh bản thiết kế Handbook mẫu chất lượng cao đã sinh sẵn (Dự phòng)"
+                    help=f"Tải ngay PDF mẫu — {config.SAMPLE_HANDBOOK_TITLE}",
+                    key="download-quick-handbook",
                 )
         else:
-            st.button("⚡ Generate Quick Handbook (Không tìm thấy PDF mẫu)", disabled=True, use_container_width=True)
+            st.button(
+                f"⚡ Handbook mẫu (thiếu {config.SAMPLE_HANDBOOK_FILENAME})",
+                disabled=True,
+                use_container_width=True,
+            )
 
 def run_demo_pipeline(topic: str):
     """Runs a full end-to-end demo flow with visual steps."""
@@ -349,7 +680,7 @@ def run_demo_pipeline(topic: str):
         )
         draft_id = fs.save_draft(draft_obj)
         topic = draft_obj.topic
-        st.info("💡 Đang sử dụng bài mẫu: 'Kỹ thuật Pomodoro'")
+        st.info(f"💡 Đang dùng nội dung demo. Handbook PDF cuối: **{config.SAMPLE_HANDBOOK_TITLE}**.")
         progress_bar.progress(40)
         
     # Step 2: Review & Approve
@@ -381,20 +712,23 @@ def run_demo_pipeline(topic: str):
     
     # Step 4: PDF Export
     status_area.info("📄 **Bước 4/4:** Đang đóng gói nội dung và xuất bản Handbook PDF...")
-    backup_pdf_path = config.PROJECT_ROOT / "TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf"
-    
+    sample_pdf = config.sample_handbook_path()
+
     try:
         from export.pdf_builder import build_chapter_pdf
         pdf_path = build_chapter_pdf(draft_id, topic, draft_obj.content_md)
         st.success("✅ Đã xuất bản Handbook PDF từ nội dung mới.")
     except Exception as e:
-        st.warning(f"⚠️ Lỗi hệ thống khi sinh PDF mới: {e}. Đang tự động kích hoạt Dự phòng (Escape Route)...")
-        if backup_pdf_path.exists():
-            pdf_path = str(backup_pdf_path)
-            topic = "Trạm gửi tri thức - Đánh thức tư duy"
-            st.success("✅ Đã kích hoạt bản thiết kế dự phòng mẫu thành công!")
+        st.warning(
+            f"⚠️ Lỗi khi sinh PDF mới: {e}. "
+            f"Chuyển sang handbook mẫu: **{config.SAMPLE_HANDBOOK_TITLE}**."
+        )
+        if sample_pdf:
+            pdf_path = str(sample_pdf)
+            topic = config.SAMPLE_HANDBOOK_TITLE
+            st.success(f"✅ Đã dùng handbook mẫu: {config.SAMPLE_HANDBOOK_TITLE}")
         else:
-            st.error("🚨 Không tìm thấy tệp dự phòng mẫu!")
+            st.error(f"🚨 Không tìm thấy `{config.SAMPLE_HANDBOOK_FILENAME}` trong TOOL!")
             raise e
             
     progress_bar.progress(100)
@@ -407,12 +741,18 @@ def run_demo_pipeline(topic: str):
         st.markdown("#### 📖 Handbook PDF")
         with open(pdf_path, "rb") as f:
             pdf_data = f.read()
+        download_name = (
+            config.SAMPLE_HANDBOOK_FILENAME
+            if sample_pdf and str(pdf_path) == str(sample_pdf)
+            else f"{topic}.pdf"
+        )
         st.download_button(
-            label="⬇️ Tải xuống Handbook", 
-            data=pdf_data, 
-            file_name=f"{topic}.pdf",
+            label="⬇️ Tải xuống Handbook",
+            data=pdf_data,
+            file_name=download_name,
             mime="application/pdf",
-            use_container_width=True
+            use_container_width=True,
+            key="download-demo-pipeline-handbook",
         )
     with col_res2:
         st.markdown("#### 📱 Facebook Posts")

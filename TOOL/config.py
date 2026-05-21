@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 import os
 
 PROJECT_ROOT = Path(__file__).parent
-# override=True: .env thắng biến môi trường hệ thống (tránh key cũ bị cache)
-load_dotenv(PROJECT_ROOT / ".env", override=True)
+# override=False: Streamlit Secrets / env vars win; .env only fills missing (local dev)
+load_dotenv(PROJECT_ROOT / ".env", override=False)
 
 # === LLM models (LiteLLM format: provider/model-name) ===
 # NOTE: Gemini 2.5 Pro no longer has free tier (Google removed it).
@@ -25,7 +25,33 @@ ADVISOR_MODEL = "gemini/gemini-2.5-flash-lite"
 REEL_MODEL = "gemini/gemini-2.5-flash-lite"
 
 # === API keys ===
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+def _resolve_gemini_api_key() -> str | None:
+    """Streamlit Secrets → environment → .env (via load_dotenv)."""
+    key: str | None = None
+
+    try:
+        import streamlit as st
+
+        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+            key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+
+    if not key:
+        key = os.getenv("GEMINI_API_KEY")
+
+    if not key:
+        return None
+
+    return str(key).strip().strip('"').strip("'")
+
+
+def gemini_api_key() -> str | None:
+    return _resolve_gemini_api_key()
+
+
+# Backward compatibility for modules that read config.GEMINI_API_KEY
+GEMINI_API_KEY = _resolve_gemini_api_key()
 
 # === Paths ===
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
@@ -37,6 +63,16 @@ SQLITE_PATH = DATA_DIR / "gced.db"
 
 ASSETS_DIR = PROJECT_ROOT / "dashboard" / "assets"
 LOGO_PATH = ASSETS_DIR / "logo.png"
+
+# === Sample handbook (demo / presentation fallback) ===
+SAMPLE_HANDBOOK_FILENAME = "TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf"
+SAMPLE_HANDBOOK_TITLE = "Trạm gửi tri thức - Đánh thức tư duy"
+SAMPLE_HANDBOOK_PATH = PROJECT_ROOT / SAMPLE_HANDBOOK_FILENAME
+
+
+def sample_handbook_path() -> Path | None:
+    """Return path to the official sample handbook PDF if present."""
+    return SAMPLE_HANDBOOK_PATH if SAMPLE_HANDBOOK_PATH.is_file() else None
 
 # === Generation params ===
 WRITER_TEMPERATURE = 0.7
