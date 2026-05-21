@@ -19,6 +19,8 @@ env/
 output/
 *.pdf
 !TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf
+!sample_handbook.pdf
+!dashboard/assets/sample_handbook.pdf
 
 # Local SQLite DB (data lives in Firestore)
 data/

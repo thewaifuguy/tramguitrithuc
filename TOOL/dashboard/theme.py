@@ -8,6 +8,7 @@ import mimetypes
 import streamlit as st
 
 import config
+from dashboard.sample_pdf import get_sample_handbook_bytes, sample_handbook_download_name
 from db import storage as fs
 from db.schemas import ChapterStatus
 
@@ -220,7 +221,6 @@ def render_empty_state(title: str, description: str, cta: str = "") -> None:
 
 def render_sample_card() -> None:
     """Promotional card + download for the official sample handbook PDF."""
-    sample_path = config.sample_handbook_path()
     st.markdown(
         f"""
         <div class="sample-card">
@@ -234,21 +234,21 @@ def render_sample_card() -> None:
         """,
         unsafe_allow_html=True,
     )
-    if sample_path:
-        with open(sample_path, "rb") as f:
-            st.download_button(
-                label="⬇️ Tải handbook mẫu (PDF)",
-                data=f.read(),
-                file_name=config.SAMPLE_HANDBOOK_FILENAME,
-                mime="application/pdf",
-                use_container_width=True,
-                key="download-sample-handbook",
-                help=f"Bản thiết kế đã hoàn thiện: {config.SAMPLE_HANDBOOK_TITLE}",
-            )
+    pdf_bytes = get_sample_handbook_bytes()
+    if pdf_bytes:
+        st.download_button(
+            label="⬇️ Tải handbook mẫu (PDF)",
+            data=pdf_bytes,
+            file_name=sample_handbook_download_name(),
+            mime="application/pdf",
+            use_container_width=True,
+            key="download-sample-handbook",
+            help=f"Bản thiết kế đã hoàn thiện: {config.SAMPLE_HANDBOOK_TITLE}",
+        )
     else:
         st.caption(
-            f"⚠️ Chưa có file `{config.SAMPLE_HANDBOOK_FILENAME}` trong thư mục TOOL. "
-            "Copy PDF handbook mẫu vào đó để hiển thị nút tải."
+            "⚠️ Chưa có PDF mẫu trên server. Push `sample_handbook.pdf` hoặc "
+            f"`{config.SAMPLE_HANDBOOK_FILENAME}` lên GitHub rồi reboot app."
         )
 
 

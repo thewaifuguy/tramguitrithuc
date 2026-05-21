@@ -39,8 +39,6 @@ _bootstrap_env()
 import requests
 
 import config
-
-config.sync_streamlit_secrets_to_env()
 from agents.media import MediaAgent
 from agents.writer import WriterAgent
 from agents.critic import CriticAgent
@@ -49,14 +47,12 @@ import datetime
 from agents.advisor import SocialAdvisorAgent
 from agents.reel import ReelAgent
 
-# Force reload of storage and schemas to pick up new functions/classes
+# Reload DB layer only (do not reload config — breaks Cloud deploy)
 import importlib
 import db.schemas
 import db.storage
-import config
 importlib.reload(db.schemas)
 importlib.reload(db.storage)
-importlib.reload(config)
 from db import storage as fs
 
 from db.schemas import (
@@ -98,6 +94,7 @@ from dashboard.theme import (
     render_sidebar,
     render_suggestion_bar,
 )
+from dashboard.sample_pdf import get_sample_handbook_bytes, sample_handbook_download_name
 
 st.set_page_config(
     page_title=config.BRAND_NAME,
@@ -650,21 +647,20 @@ with tab_demo:
             else:
                 run_demo_pipeline(demo_topic)
     with col_quick:
-        sample_pdf = config.sample_handbook_path()
-        if sample_pdf:
-            with open(sample_pdf, "rb") as f:
-                st.download_button(
-                    label="⚡ Handbook mẫu: Đánh thức tư duy",
-                    data=f.read(),
-                    file_name=config.SAMPLE_HANDBOOK_FILENAME,
-                    mime="application/pdf",
-                    use_container_width=True,
-                    help=f"Tải ngay PDF mẫu — {config.SAMPLE_HANDBOOK_TITLE}",
-                    key="download-quick-handbook",
-                )
+        pdf_bytes = get_sample_handbook_bytes()
+        if pdf_bytes:
+            st.download_button(
+                label="⚡ Handbook mẫu: Đánh thức tư duy",
+                data=pdf_bytes,
+                file_name=sample_handbook_download_name(),
+                mime="application/pdf",
+                use_container_width=True,
+                help=f"Tải ngay PDF mẫu — {config.SAMPLE_HANDBOOK_TITLE}",
+                key="download-quick-handbook",
+            )
         else:
             st.button(
-                f"⚡ Handbook mẫu (thiếu {config.SAMPLE_HANDBOOK_FILENAME})",
+                "⚡ Handbook mẫu (chưa có PDF trên server)",
                 disabled=True,
                 use_container_width=True,
             )

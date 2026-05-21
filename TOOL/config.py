@@ -106,13 +106,28 @@ LOGO_PATH = ASSETS_DIR / "logo.png"
 
 # === Sample handbook (demo / presentation fallback) ===
 SAMPLE_HANDBOOK_FILENAME = "TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf"
+SAMPLE_HANDBOOK_FILENAME_ASCII = "sample_handbook.pdf"
 SAMPLE_HANDBOOK_TITLE = "Trạm gửi tri thức - Đánh thức tư duy"
 SAMPLE_HANDBOOK_PATH = PROJECT_ROOT / SAMPLE_HANDBOOK_FILENAME
+SAMPLE_HANDBOOK_PATH_ASCII = PROJECT_ROOT / SAMPLE_HANDBOOK_FILENAME_ASCII
+SAMPLE_HANDBOOK_IN_ASSETS = ASSETS_DIR / SAMPLE_HANDBOOK_FILENAME_ASCII
 
 
 def sample_handbook_path() -> Path | None:
-    """Return path to the official sample handbook PDF if present."""
-    return SAMPLE_HANDBOOK_PATH if SAMPLE_HANDBOOK_PATH.is_file() else None
+    """Return path to the official sample handbook PDF (Unicode or ASCII name)."""
+    candidates = (
+        SAMPLE_HANDBOOK_PATH,
+        SAMPLE_HANDBOOK_PATH_ASCII,
+        SAMPLE_HANDBOOK_IN_ASSETS,
+        PROJECT_ROOT / "dashboard" / "assets" / SAMPLE_HANDBOOK_FILENAME,
+    )
+    for path in candidates:
+        if path.is_file():
+            return path
+    for path in sorted(PROJECT_ROOT.glob("*.pdf")):
+        if path.stat().st_size > 500_000:
+            return path
+    return None
 
 # === Generation params ===
 WRITER_TEMPERATURE = 0.7

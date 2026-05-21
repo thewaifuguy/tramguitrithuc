@@ -14,6 +14,7 @@ cd "c:\Users\milky\Documents\GCED\GCED"
 git add TOOL/config.py TOOL/dashboard/app.py TOOL/dashboard/theme.py TOOL/.gitignore
 git add TOOL/.env.example TOOL/.streamlit/secrets.toml.example
 git add "TOOL/TRẠM_GỬI_TRI_THỨC_-_ĐÁNH_THỨC_TƯ_DUY.pdf"
+git add TOOL/sample_handbook.pdf TOOL/dashboard/assets/sample_handbook.pdf
 git add TOOL/HUONG_DAN_STREAMLIT.md
 
 git status

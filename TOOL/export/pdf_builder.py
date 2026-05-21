@@ -21,29 +21,32 @@ logger = logging.getLogger(__name__)
 
 # --- PDF Engine Setup ---
 HAS_WEASYPRINT = False
+HAS_PISA = False
 WEASY_IMPORT_ERROR = ""
+pisa = None  # type: ignore
 
 try:
     from weasyprint import HTML
     HAS_WEASYPRINT = True
 except Exception as e:
     WEASY_IMPORT_ERROR = str(e)
-    logger.warning(f"WeasyPrint not available (missing GTK or package): {e}. Falling back to xhtml2pdf.")
+    logger.warning(f"WeasyPrint not available: {e}. Using xhtml2pdf on Streamlit/local.")
+
+try:
+    from xhtml2pdf import pisa as _pisa
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    pisa = _pisa
+    HAS_PISA = True
+    font_dir = Path(__file__).parent.parent / "fonts"
     try:
-        from xhtml2pdf import pisa
-        from reportlab.pdfbase import pdfmetrics
-        from reportlab.pdfbase.ttfonts import TTFont
-        
-        # Explicitly register fonts for xhtml2pdf to guarantee Vietnamese rendering
-        font_dir = Path(__file__).parent.parent / "fonts"
-        try:
-            pdfmetrics.registerFont(TTFont('BeVietnamPro', str(font_dir / "BeVietnamPro-Regular.ttf")))
-            pdfmetrics.registerFont(TTFont('BeVietnamPro-Bold', str(font_dir / "BeVietnamPro-Bold.ttf")))
-        except Exception as e:
-            logger.warning(f"Could not register custom TTF fonts: {e}")
-            
-    except ImportError:
-        logger.error("Neither WeasyPrint nor xhtml2pdf are installed correctly.")
+        pdfmetrics.registerFont(TTFont("BeVietnamPro", str(font_dir / "BeVietnamPro-Regular.ttf")))
+        pdfmetrics.registerFont(TTFont("BeVietnamPro-Bold", str(font_dir / "BeVietnamPro-Bold.ttf")))
+    except Exception as font_err:
+        logger.warning(f"Could not register custom TTF fonts: {font_err}")
+except ImportError:
+    logger.error("xhtml2pdf is not installed — PDF export will fail.")
 
 def build_chapter_pdf(draft_id: str, topic: str, content_md: str) -> Path:
     """Processes chapter content and returns path to generated PDF."""
@@ -165,15 +168,24 @@ def _inject_auto_summaries(markdown_text: str) -> str:
 
 def _generate_pdf(full_html: str, pdf_path: Path) -> Path:
     logger.info(f"Generating PDF at: {pdf_path}")
+    pdf_path.parent.mkdir(parents=True, exist_ok=True)
+
     if HAS_WEASYPRINT:
         try:
             HTML(string=full_html).write_pdf(str(pdf_path))
             return pdf_path
         except Exception as e:
-            logger.warning(f"WeasyPrint PDF failed: {e}. Trying fallback.")
-    pdf_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.warning(f"WeasyPrint PDF failed: {e}. Trying xhtml2pdf.")
+
+    if not HAS_PISA or pisa is None:
+        raise RuntimeError(
+            "Không có engine PDF (cần xhtml2pdf). Trên Streamlit Cloud dùng handbook mẫu có sẵn."
+        )
+
     with open(pdf_path, "wb") as f:
-        pisa.CreatePDF(full_html, dest=f, encoding='utf-8')
+        result = pisa.CreatePDF(full_html, dest=f, encoding="utf-8")
+    if result.err:
+        raise RuntimeError(f"xhtml2pdf failed with error code {result.err}")
     return pdf_path
 
 def _wrap_in_template(topic: str, html_content: str, is_project: bool = False, project_assets: Optional[Project] = None) -> str:
