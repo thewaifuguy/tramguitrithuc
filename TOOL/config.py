@@ -43,6 +43,12 @@ WRITER_MAX_TOKENS = 8000
 # === Workflow rules ===
 MAX_RETRY = 1
 
+# === Image generation bypass ===
+# Set BYPASS_IMAGE_GEN=1 in .env (or env var) to globally disable all Pollinations calls.
+# In the Streamlit UI the user can also toggle this per-session from the sidebar.
+import os as _os
+BYPASS_IMAGE_GEN: bool = _os.getenv("BYPASS_IMAGE_GEN", "0").strip() == "1"
+
 # === Brand ===
 BRAND_NAME = "Trạm gửi tri thức"
 COLOR_PRIMARY = "#2C5F5C"

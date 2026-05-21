@@ -746,3 +746,33 @@ div[data-testid="stHorizontalBlock"] button[kind="secondary"]:hover {
 .status-pending { background-color: var(--accent-soft) !important; color: #8B5A1A !important; }
 .status-approved { background-color: rgba(44, 95, 92, 0.15) !important; color: var(--primary) !important; }
 .status-rejected { background-color: rgba(220, 53, 69, 0.1) !important; color: #dc3545 !important; }
+
+/* === Scroll fix: allow tab panels to scroll vertically === */
+/* Streamlit wraps tab content in overflow:hidden by default — override it */
+[data-testid="stTabsContent"],
+[data-testid="stTabsContent"] > div,
+[data-baseweb="tab-panel"] {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: none !important;
+}
+
+/* Allow nested sub-tabs (sub_drafts / sub_ready / sub_reels) to scroll as well */
+[data-testid="stTabsContent"] [data-testid="stTabsContent"],
+[data-testid="stTabsContent"] [data-testid="stTabsContent"] > div {
+    overflow-y: auto !important;
+    max-height: none !important;
+}
+
+/* Ensure the Streamlit main block doesn't clip its children */
+[data-testid="stMain"] > div,
+[data-testid="stVerticalBlock"] {
+    overflow: visible !important;
+}
+
+/* Fix inner scrollable containers (st.container height=N) to actually scroll */
+[data-testid="stVerticalBlockBorderWrapper"] [data-testid="stVerticalBlock"],
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    overflow-y: auto !important;
+}
+

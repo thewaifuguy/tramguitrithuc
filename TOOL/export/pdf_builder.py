@@ -48,8 +48,13 @@ try:
 except ImportError:
     logger.error("xhtml2pdf is not installed — PDF export will fail.")
 
-def build_chapter_pdf(draft_id: str, topic: str, content_md: str) -> Path:
-    """Processes chapter content and returns path to generated PDF."""
+def build_chapter_pdf(draft_id: str, topic: str, content_md: str, bypass_images: bool = False) -> Path:
+    """Processes chapter content and returns path to generated PDF.
+    
+    Args:
+        bypass_images: If True, strip IMAGE_PROMPT comments instead of downloading
+                       images. No network requests are made. Useful for offline/fast export.
+    """
     output_dir = config.OUTPUT_DIR / "pdf" / draft_id
     output_dir.mkdir(parents=True, exist_ok=True)
     images_dir = output_dir / "images"
@@ -59,15 +64,19 @@ def build_chapter_pdf(draft_id: str, topic: str, content_md: str) -> Path:
     processed_md = content_md
     prompts = re.findall(r"<!--\s*IMAGE_PROMPT:\s*(.*?)\s*-->", content_md)
     
-    for i, prompt in enumerate(prompts):
-        img_filename = f"image_{i}.png"
-        img_path = images_dir / img_filename
-        if not img_path.exists():
-            url = image_url(prompt, width=1024, height=768)
-            download_image(url, img_path)
-        tag = f"<!-- IMAGE_PROMPT: {prompt} -->"
-        img_url_str = img_path.absolute().as_uri()
-        processed_md = processed_md.replace(tag, f"![image_{i}]({img_url_str})")
+    if bypass_images:
+        # Strip all IMAGE_PROMPT tags without making any network requests
+        processed_md = re.sub(r"<!--\s*IMAGE_PROMPT:.*?-->\s*", "", processed_md, flags=re.DOTALL)
+    else:
+        for i, prompt in enumerate(prompts):
+            img_filename = f"image_{i}.png"
+            img_path = images_dir / img_filename
+            if not img_path.exists():
+                url = image_url(prompt, width=1024, height=768)
+                download_image(url, img_path)
+            tag = f"<!-- IMAGE_PROMPT: {prompt} -->"
+            img_url_str = img_path.absolute().as_uri()
+            processed_md = processed_md.replace(tag, f"![image_{i}]({img_url_str})")
     
     html_content = markdown.markdown(processed_md, extensions=['extra', 'smarty', 'nl2br'])
     chapter_content = f'''
@@ -81,8 +90,13 @@ def build_chapter_pdf(draft_id: str, topic: str, content_md: str) -> Path:
     full_html = _wrap_in_template(topic, chapter_content, is_project=False)
     return _generate_pdf(full_html, pdf_path)
 
-def build_project_pdf(project_id: str, project_name: str, chapters: List[Tuple[str, "ChapterDraft"]]) -> Path:
-    """Merges multiple chapters into one handbook PDF."""
+def build_project_pdf(project_id: str, project_name: str, chapters: List[Tuple[str, "ChapterDraft"]], bypass_images: bool = False) -> Path:
+    """Merges multiple chapters into one handbook PDF.
+    
+    Args:
+        bypass_images: If True, strip IMAGE_PROMPT comments and skip all cover image
+                       loading. No network requests are made.
+    """
     from db.storage import get_project
     project_obj = get_project(project_id)
     
@@ -112,15 +126,19 @@ def build_project_pdf(project_id: str, project_name: str, chapters: List[Tuple[s
         images_dir.mkdir(parents=True, exist_ok=True)
         
         prompts = re.findall(r"<!--\s*IMAGE_PROMPT:\s*(.*?)\s*-->", processed_md)
-        for j, prompt in enumerate(prompts):
-            img_filename = f"image_{j}.png"
-            img_path = images_dir / img_filename
-            if not img_path.exists():
-                url = image_url(prompt, width=1024, height=768)
-                download_image(url, img_path)
-            tag = f"<!-- IMAGE_PROMPT: {prompt} -->"
-            img_url_str = img_path.absolute().as_uri()
-            processed_md = processed_md.replace(tag, f"![image_{j}]({img_url_str})")
+        if bypass_images:
+            # Strip all IMAGE_PROMPT tags — no network calls
+            processed_md = re.sub(r"<!--\s*IMAGE_PROMPT:.*?-->\s*", "", processed_md, flags=re.DOTALL)
+        else:
+            for j, prompt in enumerate(prompts):
+                img_filename = f"image_{j}.png"
+                img_path = images_dir / img_filename
+                if not img_path.exists():
+                    url = image_url(prompt, width=1024, height=768)
+                    download_image(url, img_path)
+                tag = f"<!-- IMAGE_PROMPT: {prompt} -->"
+                img_url_str = img_path.absolute().as_uri()
+                processed_md = processed_md.replace(tag, f"![image_{j}]({img_url_str})")
         
         html_chapter = markdown.markdown(processed_md, extensions=['extra', 'smarty', 'nl2br'])
         

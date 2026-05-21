@@ -162,6 +162,23 @@ def render_sidebar() -> None:
         else:
             st.caption("📖 Handbook mẫu PDF: chưa có trên server")
 
+        st.divider()
+        st.markdown("### ⚙️ Tùy chọn")
+        # Initialize from global config default if not yet set in session
+        if "bypass_image_gen" not in st.session_state:
+            st.session_state["bypass_image_gen"] = config.BYPASS_IMAGE_GEN
+        st.toggle(
+            "⚡ Tắt sinh ảnh (Bypass Image Gen)",
+            key="bypass_image_gen",
+            help=(
+                "Khi bật: mọi hình minh họa và ảnh bìa đều bị bỏ qua — "
+                "nội dung text vẫn giữ nguyên. Giúp app load nhanh hơn và "
+                "tiết kiệm băng thông khi thi/trình diễn."
+            ),
+        )
+        if st.session_state.get("bypass_image_gen"):
+            st.caption("🚫 Đang bật Bypass — ảnh sẽ không được sinh.")
+
         st.caption("Demo v0.3 — 2026-04-16")
 
 

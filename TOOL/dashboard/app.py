@@ -879,7 +879,7 @@ def render_draft(draft_id: str, draft: ChapterDraft, show_actions_for: Optional[
             )
             col_save, col_preview = st.columns([1, 1])
             with col_save:
-                if st.button("💾 Lưu thay đổi", key=f"save-edit-{draft_id}", type="primary", use_container_width=True):
+                if st.button("💾 Lưu thay đổi", key=f"chap-save-edit-{draft_id}", type="primary", use_container_width=True):
                     if not edited_topic.strip():
                         st.error("Tiêu đề không được để trống.")
                     else:
@@ -920,6 +920,14 @@ def _strip_image_prompts(md: str) -> str:
 
 def _render_image_sidebar(draft_id: str, draft: ChapterDraft) -> None:
     """Fetch Pollinations images server-side with long timeout, cache 1h, then display."""
+    # --- Bypass guard ---
+    if st.session_state.get("bypass_image_gen"):
+        st.info(
+            "🖼️ **Bypass Image Gen đang bật** — ảnh minh họa bị vô hiệu hóa.\n\n"
+            "Tắt toggle ⚡ trên sidebar để xem ảnh trở lại."
+        )
+        return
+
     st.caption("⏳ Lần đầu sinh ảnh mất 15-30s. Sau đó cache local sẽ hiện ngay.")
     prompts = draft.image_prompts
     for i, prompt in enumerate(prompts, 1):
@@ -1007,7 +1015,8 @@ def _render_approved_actions(draft_id: str, draft: ChapterDraft) -> None:
         ):
             try:
                 with st.spinner("Đang chuẩn bị PDF..."):
-                    pdf_path = build_chapter_pdf(draft_id, draft.topic, draft.content_md)
+                    _bypass = st.session_state.get("bypass_image_gen", False)
+                    pdf_path = build_chapter_pdf(draft_id, draft.topic, draft.content_md, bypass_images=_bypass)
                 
                 with open(pdf_path, "rb") as f:
                     st.download_button(
@@ -1355,7 +1364,8 @@ with tab_projects:
                             try:
                                 with st.spinner("Đang gộp và tạo Handbook tổng hợp..."):
                                     from export.pdf_builder import build_project_pdf
-                                    pdf_path = build_project_pdf(p_id, p_obj.name, chapters)
+                                    _bypass = st.session_state.get("bypass_image_gen", False)
+                                    pdf_path = build_project_pdf(p_id, p_obj.name, chapters, bypass_images=_bypass)
                                 
                                 with open(pdf_path, "rb") as f:
                                     st.download_button(
@@ -1526,7 +1536,7 @@ with tab_promotion:
                             col_mock, col_info = st.columns([2, 1])
                             with col_mock:
                                 img = None
-                                if post.image_prompt:
+                                if post.image_prompt and not st.session_state.get("bypass_image_gen"):
                                     img = image_url(post.image_prompt, width=400, height=600)
                                 st.components.v1.html(render_fb_post(post.content, img), height=450, scrolling=True)
                             with col_info:
@@ -1537,7 +1547,7 @@ with tab_promotion:
                                 
                                 with st.popover("✏️ Sửa", use_container_width=True):
                                     new_content = st.text_area("Nội dung bài viết", value=post.content, height=200, key=f"edit-area-{post_id}")
-                                    if st.button("Lưu thay đổi", key=f"save-edit-{post_id}"):
+                                    if st.button("Lưu thay đổi", key=f"post-save-edit-{post_id}"):
                                         fs.update_post_content(post_id, new_content)
                                         st.rerun()
 
@@ -1557,10 +1567,12 @@ with tab_promotion:
                     for post_id, post in approved_posts:
                         with st.expander(f"📢 {post.type.value.upper()} - {post.content[:50]}..."):
                             st.code(post.content, language="text")
-                            if post.image_prompt:
+                            if post.image_prompt and not st.session_state.get("bypass_image_gen"):
                                 st.write("**Gợi ý ảnh:**")
                                 st.caption(post.image_prompt)
                                 st.image(image_url(post.image_prompt, width=400, height=600))
+                            elif post.image_prompt and st.session_state.get("bypass_image_gen"):
+                                st.caption(f"🚫 Ảnh bypass (prompt ẩn): `{post.image_prompt[:60]}...`")
                             if st.button("🗑️ Xóa", key=f"del-post-a-{post_id}"):
                                 fs.delete_post(post_id)
                                 st.rerun()
