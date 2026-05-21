@@ -94,7 +94,13 @@ from dashboard.theme import (
     render_sidebar,
     render_suggestion_bar,
 )
-from dashboard.sample_pdf import get_sample_handbook_bytes, sample_handbook_download_name
+from dashboard.sample_pdf import (
+    SAMPLE_HANDBOOK_FILENAME,
+    SAMPLE_HANDBOOK_TITLE,
+    get_sample_handbook_bytes,
+    sample_handbook_download_name,
+    sample_handbook_path,
+)
 
 st.set_page_config(
     page_title=config.BRAND_NAME,
@@ -655,7 +661,7 @@ with tab_demo:
                 file_name=sample_handbook_download_name(),
                 mime="application/pdf",
                 use_container_width=True,
-                help=f"Tải ngay PDF mẫu — {config.SAMPLE_HANDBOOK_TITLE}",
+                help=f"Tải ngay PDF mẫu — {SAMPLE_HANDBOOK_TITLE}",
                 key="download-quick-handbook",
             )
         else:
@@ -695,7 +701,7 @@ def run_demo_pipeline(topic: str):
         )
         draft_id = fs.save_draft(draft_obj)
         topic = draft_obj.topic
-        st.info(f"💡 Đang dùng nội dung demo. Handbook PDF cuối: **{config.SAMPLE_HANDBOOK_TITLE}**.")
+        st.info(f"💡 Đang dùng nội dung demo. Handbook PDF cuối: **{SAMPLE_HANDBOOK_TITLE}**.")
         progress_bar.progress(40)
         
     # Step 2: Review & Approve
@@ -727,7 +733,7 @@ def run_demo_pipeline(topic: str):
     
     # Step 4: PDF Export
     status_area.info("📄 **Bước 4/4:** Đang đóng gói nội dung và xuất bản Handbook PDF...")
-    sample_pdf = config.sample_handbook_path()
+    sample_path = sample_handbook_path()
 
     try:
         from export.pdf_builder import build_chapter_pdf
@@ -736,14 +742,14 @@ def run_demo_pipeline(topic: str):
     except Exception as e:
         st.warning(
             f"⚠️ Lỗi khi sinh PDF mới: {e}. "
-            f"Chuyển sang handbook mẫu: **{config.SAMPLE_HANDBOOK_TITLE}**."
+            f"Chuyển sang handbook mẫu: **{SAMPLE_HANDBOOK_TITLE}**."
         )
-        if sample_pdf:
-            pdf_path = str(sample_pdf)
-            topic = config.SAMPLE_HANDBOOK_TITLE
-            st.success(f"✅ Đã dùng handbook mẫu: {config.SAMPLE_HANDBOOK_TITLE}")
+        if sample_path:
+            pdf_path = str(sample_path)
+            topic = SAMPLE_HANDBOOK_TITLE
+            st.success(f"✅ Đã dùng handbook mẫu: {SAMPLE_HANDBOOK_TITLE}")
         else:
-            st.error(f"🚨 Không tìm thấy `{config.SAMPLE_HANDBOOK_FILENAME}` trong TOOL!")
+            st.error("🚨 Không tìm thấy sample_handbook.pdf trên server!")
             raise e
             
     progress_bar.progress(100)
@@ -757,8 +763,8 @@ def run_demo_pipeline(topic: str):
         with open(pdf_path, "rb") as f:
             pdf_data = f.read()
         download_name = (
-            config.SAMPLE_HANDBOOK_FILENAME
-            if sample_pdf and str(pdf_path) == str(sample_pdf)
+            sample_handbook_download_name()
+            if sample_path and str(pdf_path) == str(sample_path)
             else f"{topic}.pdf"
         )
         st.download_button(

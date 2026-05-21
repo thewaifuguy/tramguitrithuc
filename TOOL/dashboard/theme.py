@@ -8,7 +8,13 @@ import mimetypes
 import streamlit as st
 
 import config
-from dashboard.sample_pdf import get_sample_handbook_bytes, sample_handbook_download_name
+from dashboard.sample_pdf import (
+    SAMPLE_HANDBOOK_FILENAME,
+    SAMPLE_HANDBOOK_TITLE,
+    get_sample_handbook_bytes,
+    sample_handbook_download_name,
+    sample_handbook_path,
+)
 from db import storage as fs
 from db.schemas import ChapterStatus
 
@@ -126,7 +132,7 @@ def render_sidebar() -> None:
                 "Streamlit → Settings → Secrets → `GEMINI_API_KEY = \"...\"` → Reboot app."
             )
 
-        if config.sample_handbook_path():
+        if sample_handbook_path():
             st.caption("📖 Handbook mẫu PDF: có sẵn trên server")
         else:
             st.caption("📖 Handbook mẫu PDF: chưa có trên server")
@@ -226,7 +232,7 @@ def render_sample_card() -> None:
         <div class="sample-card">
             <div class="sample-icon">📖</div>
             <div class="sample-text">
-                <div class="sample-title">Handbook mẫu: {config.SAMPLE_HANDBOOK_TITLE}</div>
+                <div class="sample-title">Handbook mẫu: {SAMPLE_HANDBOOK_TITLE}</div>
                 <div class="sample-desc">PDF in được, có ảnh minh họa, layout sách chuyên nghiệp — dùng cho demo và thuyết trình.</div>
             </div>
             <div class="sample-badge">Mẫu chính thức</div>
@@ -243,12 +249,12 @@ def render_sample_card() -> None:
             mime="application/pdf",
             use_container_width=True,
             key="download-sample-handbook",
-            help=f"Bản thiết kế đã hoàn thiện: {config.SAMPLE_HANDBOOK_TITLE}",
+            help=f"Bản thiết kế đã hoàn thiện: {SAMPLE_HANDBOOK_TITLE}",
         )
     else:
         st.caption(
             "⚠️ Chưa có PDF mẫu trên server. Push `sample_handbook.pdf` hoặc "
-            f"`{config.SAMPLE_HANDBOOK_FILENAME}` lên GitHub rồi reboot app."
+            f"`{SAMPLE_HANDBOOK_FILENAME}` lên GitHub rồi reboot app."
         )
 
 
