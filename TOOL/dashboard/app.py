@@ -109,6 +109,8 @@ from dashboard.sample_pdf import (
     sample_handbook_download_name,
     sample_handbook_path,
 )
+from dashboard.showcase import ensure_demo_seeded, run_fast_showcase
+from scripts.seed_demo_data import DEMO_DATA
 
 # Initialize session state for page routing
 if "current_page" not in st.session_state:
@@ -465,8 +467,8 @@ def _trigger_generate(topic: str, outline: str | None) -> bool:
                 draft_id = fs.save_draft(draft)
             except Exception as e:
                 # Fallback to seed data if API fails or times out
-                st.warning("⚠️ API đang chậm hoặc gặp lỗi. Đang chuyển sang Demo Data dự phòng...")
-                time.sleep(2)
+                st.warning("⚠️ API lỗi — dùng Demo Data. Tip: tab Demo → **Showcase ~15 giây**.")
+                time.sleep(0.5)
                 demo_items = fs.list_by_status(ChapterStatus.APPROVED, limit=1)
                 if demo_items:
                     _, demo_obj = demo_items[0]
@@ -566,6 +568,102 @@ with st.form("new-chapter", clear_on_submit=False):
 # The section-heading for Workspace was removed to fix the double menu issue
 
 
+def run_demo_pipeline(topic: str) -> None:
+    """Full demo with optional AI (slower). PDF step prefers pre-built sample file."""
+    status_area = st.empty()
+    progress_bar = st.progress(0)
+
+    status_area.info(f"🚀 **Bước 1/4:** AI Writer đang biên soạn chapter: *{topic}*...")
+    progress_bar.progress(10)
+    _ensure_api_key()
+
+    try:
+        from agents.writer import WriterAgent
+
+        writer = WriterAgent()
+        draft_obj = writer.generate_chapter(topic)
+        draft_id = fs.save_draft(draft_obj)
+        progress_bar.progress(40)
+        st.success(f"✅ Đã soạn xong chapter. ID: `{draft_id}`")
+    except Exception as e:
+        st.warning(f"⚠️ API lỗi — dùng Demo Data. Tip: **Showcase ~15 giây**.")
+        item = DEMO_DATA[0]
+        draft_obj = ChapterDraft(
+            topic=item["topic"],
+            content_md=item["content_md"],
+            image_prompts=item["image_prompts"],
+            status=ChapterStatus.APPROVED,
+            approved_at=datetime.now(),
+        )
+        draft_id = fs.save_draft(draft_obj)
+        topic = draft_obj.topic
+        st.info(f"💡 Demo data. Handbook: **{SAMPLE_HANDBOOK_TITLE}**.")
+        progress_bar.progress(40)
+
+    status_area.info("🔍 **Bước 2/4:** AI Critic đang kiểm duyệt...")
+    import time
+
+    time.sleep(0.5)
+    fs.update_status(draft_id, ChapterStatus.APPROVED)
+    progress_bar.progress(60)
+    st.success("✅ Đã phê duyệt (Quality Passed).")
+
+    status_area.info("📱 **Bước 3/4:** AI Media...")
+    try:
+        from agents.media import MediaAgent
+
+        posts = MediaAgent().generate_posts(draft_id, draft_obj.content_md)
+    except Exception:
+        posts = [
+            PostDraft(
+                chapter_id=draft_id,
+                type=PostType.SHORT,
+                content="Mẹo tập trung Pomodoro...",
+                status=PostStatus.APPROVED,
+            )
+        ]
+
+    for p in posts:
+        p.status = PostStatus.APPROVED
+        fs.save_post(p)
+    progress_bar.progress(80)
+    st.success(f"✅ {len(posts)} bài quảng bá.")
+
+    status_area.info("📄 **Bước 4/4:** Handbook PDF...")
+    pdf_bytes = get_sample_handbook_bytes()
+    if pdf_bytes:
+        pdf_data = pdf_bytes
+        download_name = sample_handbook_download_name()
+        st.success(f"✅ {SAMPLE_HANDBOOK_TITLE}")
+    else:
+        from export.pdf_builder import build_chapter_pdf
+
+        pdf_path = build_chapter_pdf(draft_id, topic, draft_obj.content_md)
+        with open(pdf_path, "rb") as f:
+            pdf_data = f.read()
+        download_name = f"{topic}.pdf"
+        st.success("✅ PDF sinh từ nội dung mới.")
+
+    progress_bar.progress(100)
+    status_area.success("🎊 **QUY TRÌNH HOÀN TẤT!**")
+    st.balloons()
+
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("#### 📖 Handbook PDF")
+        st.download_button(
+            label="⬇️ Tải xuống Handbook",
+            data=pdf_data,
+            file_name=download_name,
+            mime="application/pdf",
+            use_container_width=True,
+            key="download-demo-pipeline-handbook",
+        )
+    with c2:
+        st.markdown("#### 📱 Facebook Posts")
+        st.info("Tab **Quảng bá (Social)**.")
+
+
 # === Tabs ===
 
 tab_intro, tab_landing, tab_pending, tab_approved, tab_projects, tab_promotion, tab_rejected, tab_demo = st.tabs(
@@ -626,32 +724,58 @@ with tab_landing:
         st.error("Không tìm thấy tệp landing.html trong dashboard/assets!")
 
 with tab_demo:
+    ensure_demo_seeded(fs)
+
     st.markdown(
         """
         <div class="demo-header">
-            <h3>🎬 Chế độ Demo nhanh</h3>
-            <p>Dành cho hội đồng ban giám khảo. Handbook mẫu: <b>Trạm gửi tri thức — Đánh thức tư duy</b> (PDF có sẵn).</p>
+            <h3>🎬 Showcase (trình diễn nhanh)</h3>
+            <p><b>Khuyên dùng khi thi:</b> nút vàng <b>Showcase ~15 giây</b> — không cần API, có PDF + posts ngay.</p>
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
-    
+
     col_info, col_reset = st.columns([2, 1])
     with col_reset:
         if st.button("🗑️ Xóa toàn bộ dữ liệu", use_container_width=True):
             fs.clear_all()
+            st.session_state.pop("demo_seeded", None)
             st.warning("Đã xóa toàn bộ DB. Hãy rerun app.")
             st.rerun()
 
     st.divider()
-    st.subheader("🏁 Pipeline Thuyết trình (Presentation Mode)")
-    st.write("Chạy quy trình tự động từ ý tưởng đến sản phẩm hoàn thiện (Handbook + Posts) để trình diễn.")
-    
-    demo_topic = st.text_input("Nhập chủ đề muốn trình diễn", value="Kỹ thuật ghi nhớ Active Recall cho học sinh")
-    
-    col_pipeline, col_quick = st.columns(2)
-    with col_pipeline:
-        if st.button("🏁 Bắt đầu Quy trình Demo", type="primary", use_container_width=True):
+    demo_topic = st.text_input(
+        "Chủ đề trình diễn",
+        value="Kỹ thuật Pomodoro cho học sinh hay trì hoãn",
+        help="Showcase: chỉ đổi tiêu đề hiển thị; nội dung dùng bản demo đã chuẩn bị.",
+    )
+
+    col_fast, col_full, col_quick = st.columns(3)
+    with col_fast:
+        if st.button(
+            "⚡ Showcase ~15 giây",
+            type="primary",
+            use_container_width=True,
+            help="Không gọi Gemini — nhanh nhất cho buổi thi",
+        ):
+            if not demo_topic.strip():
+                st.error("Nhập chủ đề trước.")
+            else:
+                run_fast_showcase(
+                    fs,
+                    demo_topic,
+                    demo_data=DEMO_DATA,
+                    get_pdf_bytes=get_sample_handbook_bytes,
+                    pdf_download_name=sample_handbook_download_name(),
+                    handbook_title=SAMPLE_HANDBOOK_TITLE,
+                )
+    with col_full:
+        if st.button(
+            "🏁 Demo đầy đủ (có AI)",
+            use_container_width=True,
+            help="Gọi Gemini — có thể 30s–2 phút hoặc lỗi API",
+        ):
             if not demo_topic:
                 st.error("Vui lòng nhập chủ đề.")
             else:
@@ -675,126 +799,13 @@ with tab_demo:
                 use_container_width=True,
             )
 
-def run_demo_pipeline(topic: str):
-    """Runs a full end-to-end demo flow with visual steps."""
-    status_area = st.empty()
-    progress_bar = st.progress(0)
-    
-    # Step 1: Generation
-    status_area.info(f"🚀 **Bước 1/4:** AI Writer đang biên soạn chapter: *{topic}*...")
-    progress_bar.progress(10)
-    _ensure_api_key()
-
-    try:
-        from agents.writer import WriterAgent
-        writer = WriterAgent()
-        draft_obj = writer.generate_chapter(topic)
-        draft_id = fs.save_draft(draft_obj)
-        progress_bar.progress(40)
-        st.success(f"✅ Đã soạn xong chapter. ID: `{draft_id}`")
-    except Exception as e:
-        st.warning(f"⚠️ API chậm hoặc lỗi: {e}. Đang chuyển sang dữ liệu mẫu để demo...")
-        from scripts.seed_demo_data import DEMO_DATA
-        item = DEMO_DATA[0]
-        from db.schemas import ChapterDraft, ChapterStatus
-        draft_obj = ChapterDraft(
-            topic=item["topic"],
-            content_md=item["content_md"],
-            image_prompts=item["image_prompts"],
-            status=ChapterStatus.APPROVED,
-            approved_at=datetime.now()
-        )
-        draft_id = fs.save_draft(draft_obj)
-        topic = draft_obj.topic
-        st.info(f"💡 Đang dùng nội dung demo. Handbook PDF cuối: **{SAMPLE_HANDBOOK_TITLE}**.")
-        progress_bar.progress(40)
-        
-    # Step 2: Review & Approve
-    status_area.info("🔍 **Bước 2/4:** AI Critic đang kiểm duyệt chất lượng nội dung...")
-    import time
-    time.sleep(2) # Visual pause
-    fs.update_status(draft_id, ChapterStatus.APPROVED)
-    progress_bar.progress(60)
-    st.success("✅ Nội dung đã được AI Critic phê duyệt (Quality Passed).")
-    
-    # Step 3: Social Media
-    status_area.info("📱 **Bước 3/4:** AI Media đang lên kế hoạch truyền thông & thiết kế bài viết...")
-    try:
-        from agents.media import MediaAgent
-        media_agent = MediaAgent()
-        posts = media_agent.generate_posts(draft_id, draft_obj.content_md)
-    except:
-        # Fallback posts
-        from db.schemas import PostDraft, PostType, PostStatus
-        posts = [
-            PostDraft(chapter_id=draft_id, type=PostType.SHORT, content="Mẹo tập trung Pomodoro...", status=PostStatus.APPROVED)
-        ]
-        
-    for p in posts:
-        p.status = PostStatus.APPROVED # Auto-approve for demo
-        fs.save_post(p)
-    progress_bar.progress(80)
-    st.success(f"✅ Đã tạo xong {len(posts)} bài viết quảng bá.")
-    
-    # Step 4: PDF Export
-    status_area.info("📄 **Bước 4/4:** Đang đóng gói nội dung và xuất bản Handbook PDF...")
-    sample_path = sample_handbook_path()
-
-    try:
-        from export.pdf_builder import build_chapter_pdf
-        pdf_path = build_chapter_pdf(draft_id, topic, draft_obj.content_md)
-        st.success("✅ Đã xuất bản Handbook PDF từ nội dung mới.")
-    except Exception as e:
-        st.warning(
-            f"⚠️ Lỗi khi sinh PDF mới: {e}. "
-            f"Chuyển sang handbook mẫu: **{SAMPLE_HANDBOOK_TITLE}**."
-        )
-        if sample_path:
-            pdf_path = str(sample_path)
-            topic = SAMPLE_HANDBOOK_TITLE
-            st.success(f"✅ Đã dùng handbook mẫu: {SAMPLE_HANDBOOK_TITLE}")
-        else:
-            st.error("🚨 Không tìm thấy sample_handbook.pdf trên server!")
-            raise e
-            
-    progress_bar.progress(100)
-    
-    status_area.success("🎊 **QUY TRÌNH HOÀN TẤT!**")
-    st.balloons()
-    
-    col_res1, col_res2 = st.columns(2)
-    with col_res1:
-        st.markdown("#### 📖 Handbook PDF")
-        with open(pdf_path, "rb") as f:
-            pdf_data = f.read()
-        download_name = (
-            sample_handbook_download_name()
-            if sample_path and str(pdf_path) == str(sample_path)
-            else f"{topic}.pdf"
-        )
-        st.download_button(
-            label="⬇️ Tải xuống Handbook",
-            data=pdf_data,
-            file_name=download_name,
-            mime="application/pdf",
-            use_container_width=True,
-            key="download-demo-pipeline-handbook",
-        )
-    with col_res2:
-        st.markdown("#### 📱 Facebook Posts")
-        st.info("Các bài viết đã sẵn sàng trong tab 'Quảng bá (Social)'.")
-        
-    if st.button("Quay lại Dashboard"):
-        st.rerun()
-            
-
     st.divider()
-    st.markdown("**Gợi ý cho ban giám khảo:**")
-    st.write("1. Nhập một chủ đề bất kỳ ở phía trên.")
-    st.write("2. Vào tab **Chờ duyệt** để xem AI viết.")
-    st.write("3. Bấm **Duyệt** để chuyển qua tab **Sách đã duyệt**.")
-    st.write("4. Bấm **Xuất PDF** để xem thành phẩm cuối cùng.")
-
+    st.markdown("**Kịch bản nhanh (~2 phút):**")
+    st.markdown(
+        "1. **Showcase ~15 giây** → progress 4 bước → tải PDF  \n"
+        "2. Tab **Quảng bá** → preview Facebook  \n"
+        "3. (Tuỳ chọn) Tab **Chờ duyệt** / **Sách đã duyệt**"
+    )
 
 
 def render_draft(draft_id: str, draft: ChapterDraft, show_actions_for: Optional[ChapterStatus] = None) -> None:
