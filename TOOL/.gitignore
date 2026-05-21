@@ -1,5 +1,6 @@
 # Secrets
 .env
+.streamlit/secrets.toml
 firebase-key.json
 *.pem
 

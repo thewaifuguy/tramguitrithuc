@@ -17,11 +17,30 @@ from typing import Optional, List, Dict, Any, Union
 import streamlit as st
 
 # Make TOOL/ importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+_TOOL_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(_TOOL_ROOT))
+
+
+def _bootstrap_env() -> None:
+    """Streamlit Secrets → os.environ before config/agents load."""
+    import os
+
+    try:
+        if "GEMINI_API_KEY" in st.secrets:
+            raw = str(st.secrets["GEMINI_API_KEY"]).strip().strip('"').strip("'")
+            if raw:
+                os.environ["GEMINI_API_KEY"] = raw
+    except Exception:
+        pass
+
+
+_bootstrap_env()
 
 import requests
 
 import config
+
+config.sync_streamlit_secrets_to_env()
 from agents.media import MediaAgent
 from agents.writer import WriterAgent
 from agents.critic import CriticAgent

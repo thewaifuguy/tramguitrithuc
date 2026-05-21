@@ -116,6 +116,20 @@ def render_sidebar() -> None:
             """
         )
 
+        key_status = config.gemini_key_status()
+        if key_status["ok"]:
+            st.success(f"🔑 Gemini API: {key_status['hint']} `{key_status['preview']}`")
+        else:
+            st.error(
+                "🔑 Gemini API: chưa cấu hình. "
+                "Streamlit → Settings → Secrets → `GEMINI_API_KEY = \"...\"` → Reboot app."
+            )
+
+        if config.sample_handbook_path():
+            st.caption("📖 Handbook mẫu PDF: có sẵn trên server")
+        else:
+            st.caption("📖 Handbook mẫu PDF: chưa có trên server")
+
         st.caption("Demo v0.3 — 2026-04-16")
 
 

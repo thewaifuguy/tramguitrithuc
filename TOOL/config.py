@@ -25,33 +25,73 @@ ADVISOR_MODEL = "gemini/gemini-2.5-flash-lite"
 REEL_MODEL = "gemini/gemini-2.5-flash-lite"
 
 # === API keys ===
+def _clean_key(value: str | None) -> str | None:
+    if not value:
+        return None
+    cleaned = str(value).strip().strip('"').strip("'")
+    return cleaned or None
+
+
+def sync_streamlit_secrets_to_env() -> None:
+    """Copy Streamlit Cloud / local secrets into os.environ (call once at app startup)."""
+    try:
+        import streamlit as st
+
+        for name in ("GEMINI_API_KEY",):
+            try:
+                if name in st.secrets:
+                    val = _clean_key(st.secrets[name])
+                    if val:
+                        os.environ[name] = val
+            except Exception:
+                continue
+    except Exception:
+        pass
+
+
 def _resolve_gemini_api_key() -> str | None:
     """Streamlit Secrets → environment → .env (via load_dotenv)."""
+    sync_streamlit_secrets_to_env()
+
     key: str | None = None
 
     try:
         import streamlit as st
 
-        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
-            key = st.secrets["GEMINI_API_KEY"]
+        if hasattr(st, "secrets"):
+            try:
+                key = _clean_key(st.secrets["GEMINI_API_KEY"])
+            except (KeyError, TypeError):
+                pass
     except Exception:
         pass
 
     if not key:
-        key = os.getenv("GEMINI_API_KEY")
+        key = _clean_key(os.getenv("GEMINI_API_KEY"))
 
-    if not key:
-        return None
-
-    return str(key).strip().strip('"').strip("'")
+    return key
 
 
 def gemini_api_key() -> str | None:
     return _resolve_gemini_api_key()
 
 
-# Backward compatibility for modules that read config.GEMINI_API_KEY
-GEMINI_API_KEY = _resolve_gemini_api_key()
+def gemini_key_status() -> dict[str, str | bool]:
+    """Safe diagnostic for UI (never exposes full key)."""
+    key = _resolve_gemini_api_key()
+    if not key:
+        return {"ok": False, "hint": "Chưa có GEMINI_API_KEY", "preview": ""}
+    return {
+        "ok": True,
+        "hint": "Đã nạp key",
+        "preview": f"{key[:6]}...{key[-4:]}" if len(key) > 12 else "(key ngắn)",
+    }
+
+
+def __getattr__(name: str):
+    if name == "GEMINI_API_KEY":
+        return _resolve_gemini_api_key()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 # === Paths ===
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
@@ -89,9 +129,11 @@ COLOR_ACCENT = "#E8A33D"
 
 
 def require_gemini_key() -> str:
-    if not GEMINI_API_KEY:
+    key = _resolve_gemini_api_key()
+    if not key:
         raise RuntimeError(
-            "GEMINI_API_KEY not set. Copy .env.example to .env and fill in your key "
-            "from https://aistudio.google.com/"
+            "GEMINI_API_KEY not set. "
+            "Streamlit Cloud: App settings → Secrets → GEMINI_API_KEY = \"your-key\". "
+            "Local: copy .env.example to .env. Get a key at https://aistudio.google.com/"
         )
-    return GEMINI_API_KEY
+    return key
